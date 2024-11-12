@@ -1,0 +1,2 @@
+# don't track changes to csv files
+*.csv
