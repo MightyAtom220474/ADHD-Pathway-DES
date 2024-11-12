@@ -1,4 +1,4 @@
-This project is a discrete event simulation designed to models the flow of CYP
+This project is a discrete event simulation designed to model the flow of CYP
 through the newly designed ADHD diagnostic pathway.
 
 The model is run via a streamlit app that is called by running the app.py file
