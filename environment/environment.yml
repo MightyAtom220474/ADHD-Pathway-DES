@@ -1,0 +1,11 @@
+name: des
+channels:
+  - defaults
+dependencies:
+  - python=3.11.4
+  - ipykernel
+  - pip:
+    - simpy==4.0.2
+    - numpy==1.25.2
+    - pandas==2.0.3
+prefix: C:\Users\dan\anaconda3\envs\des
