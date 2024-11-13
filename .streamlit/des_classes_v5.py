@@ -217,24 +217,38 @@ class Model:
             # seeing some odd behaviour in the final result
             self.max_triage_wl = self.results_df["Triage WL Posn"].max()
             self.triage_rej = self.results_df["Triage Rejected"].sum()
+            self.triage_avg_wait = self.results_df["Q Time Triage"].mean()
+            #self.triage_targ_wait = g.target_triage_wait
             self.pack_rej = self.results_df["Pack Rejected"].sum()
             self.obs_rej = self.results_df["Obs Rejected"].sum()
             self.max_mdt_wl = self.results_df["MDT WL Posn"].max()
             self.mdt_rej = self.results_df["MDT Rejected"].sum()
+            self.mdt_avg_wait = self.results_df["Q Time MDT"].mean()
+            #self.mdt_targ_wait = g.target_mdt_wait
             self.max_asst_wl = self.results_df["Asst WL Posn"].max()
             self.asst_rej = self.results_df["Asst Rejected"].sum()
+            self.asst_avg_wait = self.results_df["Q Time Asst"].mean()
+            #self.asst_targ_wait = g.target_asst_wait
 
             # weekly waiting list positions
             self.df_weekly_stats.append(
-                {'Week Number':self.week_number,
+                {
+                    'Week Number':self.week_number,
                  'Triage WL':self.max_triage_wl,
                  'Triage Rejects':self.triage_rej,
+                 'Triage Wait':self.triage_avg_wait,
+                 #'Triage Target Wait':self.triage_targ_wait,
                  'Pack Rejects':self.pack_rej,
                  'Obs Rejects':self.obs_rej,
                  'MDT WL':self.max_mdt_wl,
                  'MDT Rejects':self.mdt_rej,
+                 'MDT Wait':self.mdt_avg_wait,
+                 #'MDT Target Wait':self.mdt_targ_wait,
                  'Asst WL':self.max_asst_wl,
-                 'Asst Rejects':self.asst_rej}
+                 'Asst Rejects':self.asst_rej,
+                 'Asst Wait':self.asst_avg_wait,
+                 #'Asst Target Wait':self.asst_targ_wait
+                 }
                  )
 
             # SR Comment - can remove this as have done in a slightly different way
@@ -756,3 +770,11 @@ class Trial:
 
         # Once the trial (i.e. all runs) has completed, print the final results
         return self.df_trial_results, pd.concat(self.weekly_wl_dfs)
+    
+# my_trial = Trial()
+# pd.set_option('display.max_rows', 1000)
+# # Call the run_trial method of our Trial class object
+
+# df_trial_results, df_weekly_stats = my_trial.run_trial()
+
+# df_trial_results, df_weekly_stats
