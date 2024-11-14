@@ -114,6 +114,8 @@ if button_run_pressed:
         st.write(df_trial_results)
         #df_trial_results.to_csv('adhd_trial_results.csv')
 
+        st.write(df_weekly_stats)
+
         df_weekly_wl = df_weekly_stats[['Run','Week Number','Triage WL','MDT WL','Asst WL']]
 
         df_weekly_wl_unpivot = pd.melt(df_weekly_wl, value_vars=['Triage WL', 'MDT WL','Asst WL'], id_vars=['Run','Week Number'])
