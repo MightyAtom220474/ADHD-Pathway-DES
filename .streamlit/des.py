@@ -124,7 +124,7 @@ if button_run_pressed:
 
         df_weekly_wt = df_weekly_stats[['Run','Week Number','Triage Wait','MDT Wait','Asst Wait']]
 
-        df_weekly_wt_unpivot = pd.melt(df_weekly_wl, value_vars=['Triage Wait', 'MDT Wait','Asst Wait'], id_vars=['Run','Week Number'])
+        df_weekly_wt_unpivot = pd.melt(df_weekly_wt, value_vars=['Triage Wait', 'MDT Wait','Asst Wait'], id_vars=['Run','Week Number'])
 
         #df_weekly_wt_targ = df_weekly_stats[['Run','Week Number','Triage Target Wait','MDT Target Wait','Asst TargetWait']]
         
