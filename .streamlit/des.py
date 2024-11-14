@@ -120,9 +120,9 @@ if button_run_pressed:
 
         df_weekly_wl_unpivot = pd.melt(df_weekly_wl, value_vars=['Triage WL', 'MDT WL','Asst WL'], id_vars=['Run','Week Number'])
         
-        df_weekly_rej = df_weekly_stats[['Run','Week Number','Triage Rejects','Pack Rejects','Obs Rejects','MDT Rejects','Asst Rejects']]
+        df_weekly_rej = df_weekly_stats[['Run','Week Number','Triage Rejects','MDT Rejects','Asst Rejects']]
 
-        df_weekly_rej_unpivot = pd.melt(df_weekly_rej, value_vars=['Triage Rejects','Pack Rejects','Obs Rejects','MDT Rejects','Asst Rejects'], id_vars=['Run','Week Number'])
+        df_weekly_rej_unpivot = pd.melt(df_weekly_rej, value_vars=['Triage Rejects','MDT Rejects','Asst Rejects'], id_vars=['Run','Week Number'])
 
         df_weekly_wt = df_weekly_stats[['Run','Week Number','Triage Wait','MDT Wait','Asst Wait']]
 
