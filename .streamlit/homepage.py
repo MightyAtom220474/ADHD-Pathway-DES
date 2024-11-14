@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.logo("lscft_logo.jpg")
+# st.logo("lscft_logo.jpg")
 
 with open("style.css") as css:
     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
