@@ -162,7 +162,7 @@ if button_run_pressed:
                             #facet_col="variable", # show each facet as a column
                             height=500,
                             width=350,
-                            title=f'ADHD {list_name} by Week'
+                            title=f'{list_name} by Week'
                             )
                 
                 fig.update_traces(line=dict(dash='dot'))
@@ -212,7 +212,7 @@ if button_run_pressed:
                             #facet_col="variable", # show each facet as a column
                             height=500,
                             width=350,
-                            title=f'ADHD {list_name} by Week'
+                            title=f'{list_name} by Week'
                             )
                 
                 fig2.update_traces(line=dict(dash='dot'))
@@ -269,7 +269,7 @@ if button_run_pressed:
                             #facet_col="variable", # show each facet as a column
                             height=500,
                             width=350,
-                            title=f'ADHD {list_name} by Week'
+                            title=f'{list_name} by Week'
                             )
                 
                 fig3.update_traces(line=dict(dash='dot'))
