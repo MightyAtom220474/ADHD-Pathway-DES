@@ -8,7 +8,7 @@ with open("style.css") as css:
 st.title("ADHD Pathway Simulation App")
 
 st.write("Welcome to the ADHD pathway simulation app! This simulation is " 
-         "designed to model the flow of CYP through our new diagnostic"
+         "designed to model the flow of CYP through our new diagnostic "
          "Pathway")
 
 st.write("Head to the 'Run Pathway Simulation' page to get started.")
