@@ -14,11 +14,11 @@ from des_classes_v5 import g, Trial
 ########## Streamlit App ##########
 st.set_page_config(layout="wide")
 
-st.logo("lscft_logo.jpg")
+#st.logo("lscft_logo.jpg")
 
 # Import custom css for using a Google font
-with open("style.css") as css:
-   st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
+# with open("style.css") as css:
+#    st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
 
 st.title("ADHD Pathway Simulation")
 
