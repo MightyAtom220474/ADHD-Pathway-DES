@@ -18,10 +18,11 @@ import streamlit as st
 # for the user to go to the lsoa map (to choose their region for demand) rather than going to the
 # des page first
 # i.e. the order of pages in the list will affect the order they appear in the sidebar for the user
+
 pg = st.navigation(
     [st.Page("homepage.py", title="Welcome!", icon=":material/add_circle:"),
-     st.Page("des.py", title="Run Pathway Simulation", icon=":material/public:"),
-     ]
+     st.Page("des.py", title="Run Pathway Simulation", icon=":material/public:")
+     ,]
      )
 
 pg.run()
