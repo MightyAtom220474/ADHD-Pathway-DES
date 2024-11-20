@@ -14,7 +14,7 @@ from des_classes_v5 import g, Trial
 ########## Streamlit App ##########
 st.set_page_config(layout="wide")
 
-#st.logo("lscft_logo.jpg")
+st.logo("https://lancsvp.org.uk/wp-content/uploads/2021/08/nhs-logo-300x189.png")
 
 # Import custom css for using a Google font
 # with open("style.css") as css:
