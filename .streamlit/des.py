@@ -10,6 +10,7 @@ import kaleido
 import io
 
 from des_classes_v5 import g, Trial
+from app_style import global_page_style
 
 ########## Streamlit App ##########
 st.set_page_config(layout="wide")
@@ -17,8 +18,10 @@ st.set_page_config(layout="wide")
 st.logo("https://lancsvp.org.uk/wp-content/uploads/2021/08/nhs-logo-300x189.png")
 
 # Import custom css for using a Google font
-with open("style.css") as css:
-   st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
+# with open("style.css") as css:
+#    st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
+
+global_page_style()
 
 st.title("ADHD Pathway Simulation")
 
