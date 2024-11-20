@@ -17,8 +17,8 @@ st.set_page_config(layout="wide")
 st.logo("https://lancsvp.org.uk/wp-content/uploads/2021/08/nhs-logo-300x189.png")
 
 # Import custom css for using a Google font
-# with open("style.css") as css:
-#    st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
+with open("style.css") as css:
+   st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
 
 st.title("ADHD Pathway Simulation")
 

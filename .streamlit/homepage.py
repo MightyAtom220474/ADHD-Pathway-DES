@@ -2,8 +2,8 @@ import streamlit as st
 
 st.logo("https://lancsvp.org.uk/wp-content/uploads/2021/08/nhs-logo-300x189.png")
 
-# with open("style.css") as css:
-#     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
+with open("style.css") as css:
+    st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
 
 st.title("ADHD Pathway Simulation App")
 
