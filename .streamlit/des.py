@@ -10,7 +10,7 @@ import kaleido
 import io
 
 from des_classes_v5 import g, Trial
-from app_style import global_page_style
+#from app_style import global_page_style
 
 ########## Streamlit App ##########
 st.set_page_config(layout="wide")
