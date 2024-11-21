@@ -508,7 +508,7 @@ class Model:
                     self.results_df.at[p.id,'Triage Mins Clin'] = \
                                                     self.triage_time_clin
                     self.results_df.at[p.id,'Triage Mins Admin'] = \
-                                                    self.triage_time_clin
+                                                    self.triage_time_admin
 
                     # Record total time it took to triage patient
                     self.results_df.at[p.id, 'Total Triage Time'] = \
