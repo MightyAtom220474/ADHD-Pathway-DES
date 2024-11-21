@@ -32,7 +32,10 @@ class g:
     triage_waiting_list = 0 # number waiting for triage
     triage_rejection_rate = 0.05 # % rejected at triage, assume 5%
     triage_resource = 48 # number of triage slots p/w @ 10 mins
-    #triage_admin_resource = 48 # number of triage slots p/w @ 30 mins
+    triage_clin_time = 75 # number of mins for clinician to do triage
+    triage_max_clin_time = 90 # maximum time it takes clin to do triage
+    triage_admin_time = 60 # number of mins for admin to do triage
+    triage_max_admin_time = 75 # maximum time it takes admin to do triage
     total_triage_clinical_time = 0 # clinical time used on triages p/w
     total_triage_admin_time = 0 # # admin time used on triages p/w
 
@@ -52,7 +55,10 @@ class g:
     # Assessment
     target_asst_wait = 4 # assess within 4 weeks
     asst_resource = 62 # number of assessment slots p/w @ 60 mins
-    #asst_admin_resource = 62 # number of assessment slots p/w @ 90 mins
+    asst_clin_time = 90 # number of mins for clinician to do asst
+    asst_max_clin_time = 90 # maximum time it takes clin to do asst
+    asst_admin_time = 60 # number of mins for admin to do asst
+    asst_max_admin_time = 90 # maximum time it takes admin to do asst
     asst_rejection_rate = 0.01 # % found not to have ADHD, assume 1%
 
     # Diagnosis
@@ -88,6 +94,8 @@ class Patient:
 
         #Triage
         self.q_time_triage = 0 # how long they waited for triage
+        self.triage_time_clin # how long the triage took clinician in minutes
+        self.triage_time_admin # how long the triage took admin in minutes
         self.place_on_triage_wl = 0 # position they are on Triage waiting list
         self.triage_rejected = 0 # were they rejected following triage
 
@@ -106,6 +114,8 @@ class Patient:
 
         # Assessment
         self.q_time_asst = 0 # how long they waited for assessment
+        self.asst_time_clin # how long the asst took clinician in minutes
+        self.asst_time_admin # how long the asst took admin in minutes
         self.place_on_asst_wl = 0 # position they are on assessment waiting list
         self.asst_rejected = 0 # were they rejected following assessment
 
@@ -138,6 +148,8 @@ class Model:
         # Triage
         self.results_df['Q Time Triage'] = [0.0]
         self.results_df['Time to Triage'] = [0.0]
+        self.results_df['Triage Mins Clin'] = [0.0]
+        self.results_df['Triage Mins Admin'] = [0.0]
         self.results_df['Total Triage Time'] = [0.0]
         self.results_df['Triage WL Posn'] = [0]
         self.results_df['Triage Rejected'] = [0]
@@ -156,6 +168,8 @@ class Model:
         # Triage
         self.results_df['Q Time Asst'] = [0.0]
         self.results_df['Time to Asst'] = [0.0]
+        self.results_df['Asst Mins Clin'] = [0.0]
+        self.results_df['Asst Mins Admin'] = [0.0]
         self.results_df['Total Asst Time'] = [0.0]
         self.results_df['Asst WL Posn'] = [0]
         self.results_df['Asst Rejected'] = [0]
@@ -462,20 +476,42 @@ class Model:
                     # pick a random time from 1-4 for how long it took to Triage
                     sampled_triage_time = round(random.uniform(0, 4), 1)
 
+                    # decide how many mins clinical and admin time were
+                    sampled_triage_clin = np.random.poisson(
+                            lam=g.triage_clin_time,
+                            size=g.triage_max_clin_time
+                            )
+                    # pick a value at random from the Poisson distribution
+                    sampled_triage_clin_time = \
+                                    int(random.choice(sampled_triage_clin))
+                    
+                    sampled_triage_admin = np.random.poisson(
+                            lam=g.triage_admin_time,
+                            size=g.triage_max_admin_time
+                            )
+                    # pick a value at random from the Poisson distribution
+                    sampled_triage_admin_time = \
+                                    int(random.choice(sampled_triage_admin))
+
                     # Calculate how long it took the patient to be Triaged
                     self.q_time_triage = end_q_triage - start_q_triage
 
                     # Record how long the patient waited to be Triaged
                     self.results_df.at[p.id, 'Q Time Triage'] = \
                                                             (self.q_time_triage)
-                    # Record how long the patient took to be Triage
+                    # Record how long the patient took to be Triaged
                     self.results_df.at[p.id, 'Time to Triage'] = \
-                                                            sampled_triage_time
+                                                    sampled_triage_time
+                    self.results_df.at[p.id,'Triage Mins Clin'] = \
+                                                    sampled_triage_clin_time
+                    self.results_df.at[p.id,'Triage Mins Admin'] = \
+                                                    sampled_triage_admin_time
+
                     # Record total time it took to triage patient
                     self.results_df.at[p.id, 'Total Triage Time'] = \
-                                                                (sampled_triage_time
-                                                                +(end_q_triage -
-                                                                start_q_triage))
+                                                            (sampled_triage_time
+                                                            +(end_q_triage -
+                                                            start_q_triage))
 
                     #print(f'Patient number {self.patient_counter} triaged')
 
@@ -630,6 +666,23 @@ class Model:
                                             # pick a random time from 1-4 for how long it took to Assess
                                             sampled_asst_time = round(random.uniform(0,4),1)
 
+                                            # decide how many mins clinical and admin time were
+                                            sampled_asst_clin = np.random.poisson(
+                                                    lam=g.asst_clin_time,
+                                                    size=g.asst_max_clin_time
+                                                    )
+                                            # pick a value at random from the Poisson distribution
+                                            sampled_asst_clin_time = \
+                                                            int(random.choice(sampled_asst_clin))
+                                            
+                                            sampled_asst_admin = np.random.poisson(
+                                                    lam=g.asst_admin_time,
+                                                    size=g.asst_max_admin_time
+                                                    )
+                                            # pick a value at random from the Poisson distribution
+                                            sampled_asst_admin_time = \
+                                                            int(random.choice(sampled_asst_admin))
+
                                             # Calculate how long it took the patient to be Assessed
                                             self.q_time_asst = end_q_asst - start_q_asst
 
@@ -638,7 +691,11 @@ class Model:
                                                                                         (self.q_time_asst)
                                             # Record how long the patient took to be Triage
                                             self.results_df.at[p.id, 'Time to Asst'] = \
-                                                                                        sampled_asst_time
+                                                    sampled_asst_time
+                                            self.results_df.at[p.id,'Asst Mins Clin'] = \
+                                                    sampled_asst_clin_time
+                                            self.results_df.at[p.id,'Asst Mins Admin'] = \
+                                                    sampled_asst_admin_time
                                             # Record total time it took to triage patient
                                             self.results_df.at[p.id, 'Total Asst Time'] = \
                                                                                         (sampled_asst_time

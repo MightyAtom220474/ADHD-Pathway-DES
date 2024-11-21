@@ -41,6 +41,9 @@ with st.sidebar:
                                        0.0, 10.0, 5.0)
     triage_target_input = st.slider("Number of Weeks to Triage", 1, 10, 4)
     triage_resource_input =  st.slider("Number of Triage Slots p/w", 20, 60, 48)
+    triage_clin_time_input =  st.slider("Avg Clinical Time per Triage (mins)", 20, 60, 48)
+    triage_admin_time_input =  st.slider("Avg Admin Time per Triage (mins)", 20, 60, 48)
+
     
     # School/Home Assessment Packs
     st.divider()
@@ -71,6 +74,8 @@ with st.sidebar:
     asst_target_input = st.slider("Number of Weeks to Assess", 0, 5, 4)
     asst_resource_input =  st.slider("Number of Assessment Slots p/w",
                                      40, 80, 62)
+    asst_clin_time_input =  st.slider("Avg Clinical Time per Asst (mins)", 20, 60, 48)
+    asst_admin_time_input =  st.slider("Avg Admin Time per Asst (mins)", 20, 60, 48)
 
     st.divider()
     st.markdown("#### Simulation Parameters")
@@ -84,6 +89,8 @@ g.referral_rejection_rate = referral_reject_input/100
 g.triage_rejection_rate = triage_rejection_input/100
 g.target_triage_wait = triage_target_input
 g.triage_resource = triage_resource_input
+g.triage_clin_time = triage_clin_time_input
+g.triage_admin_time = triage_admin_time_input
 g.target_pack_wait = target_pack_input
 g.pack_rejection_rate = pack_rejection_input/100
 g.target_obs_wait = target_obs_input
@@ -95,6 +102,8 @@ g.mdt_resource = mdt_resource_input
 g.asst_rejection_rate = asst_rejection_input/100
 g.target_asst_wait = asst_target_input
 g.asst_resource = asst_resource_input
+g.asst_clin_time = asst_clin_time_input
+g.asst_admin_time = asst_admin_time_input
 
 g.sim_duration = sim_duration_input
 g.number_of_runs = number_of_runs_input
