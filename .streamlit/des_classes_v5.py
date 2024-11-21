@@ -94,8 +94,8 @@ class Patient:
 
         #Triage
         self.q_time_triage = 0 # how long they waited for triage
-        self.triage_time_clin # how long the triage took clinician in minutes
-        self.triage_time_admin # how long the triage took admin in minutes
+        self.triage_time_clin = 0 # how long the triage took clinician in minutes
+        self.triage_time_admin = 0 # how long the triage took admin in minutes
         self.place_on_triage_wl = 0 # position they are on Triage waiting list
         self.triage_rejected = 0 # were they rejected following triage
 
@@ -114,8 +114,8 @@ class Patient:
 
         # Assessment
         self.q_time_asst = 0 # how long they waited for assessment
-        self.asst_time_clin # how long the asst took clinician in minutes
-        self.asst_time_admin # how long the asst took admin in minutes
+        self.asst_time_clin = 0 # how long the asst took clinician in minutes
+        self.asst_time_admin = 0 # how long the asst took admin in minutes
         self.place_on_asst_wl = 0 # position they are on assessment waiting list
         self.asst_rejected = 0 # were they rejected following assessment
 
