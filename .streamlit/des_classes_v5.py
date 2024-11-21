@@ -496,6 +496,9 @@ class Model:
                     # Calculate how long it took the patient to be Triaged
                     self.q_time_triage = end_q_triage - start_q_triage
 
+                    self.triage_time_clin = sampled_triage_clin_time
+                    self.triage_time_admin = sampled_triage_admin_time
+
                     # Record how long the patient waited to be Triaged
                     self.results_df.at[p.id, 'Q Time Triage'] = \
                                                             (self.q_time_triage)
@@ -503,9 +506,9 @@ class Model:
                     self.results_df.at[p.id, 'Time to Triage'] = \
                                                     sampled_triage_time
                     self.results_df.at[p.id,'Triage Mins Clin'] = \
-                                                    sampled_triage_clin_time
+                                                    self.triage_time_clin
                     self.results_df.at[p.id,'Triage Mins Admin'] = \
-                                                    sampled_triage_admin_time
+                                                    self.triage_time_clin
 
                     # Record total time it took to triage patient
                     self.results_df.at[p.id, 'Total Triage Time'] = \
@@ -682,6 +685,9 @@ class Model:
                                             # pick a value at random from the Poisson distribution
                                             sampled_asst_admin_time = \
                                                             int(random.choice(sampled_asst_admin))
+                                            
+                                            self.asst_time_clin = sampled_triage_clin_time
+                                            self.asst_time_admin = sampled_triage_admin_time
 
                                             # Calculate how long it took the patient to be Assessed
                                             self.q_time_asst = end_q_asst - start_q_asst
@@ -693,9 +699,9 @@ class Model:
                                             self.results_df.at[p.id, 'Time to Asst'] = \
                                                     sampled_asst_time
                                             self.results_df.at[p.id,'Asst Mins Clin'] = \
-                                                    sampled_asst_clin_time
+                                                    self.asst_time_clin
                                             self.results_df.at[p.id,'Asst Mins Admin'] = \
-                                                    sampled_asst_admin_time
+                                                    self.asst_time_admin
                                             # Record total time it took to triage patient
                                             self.results_df.at[p.id, 'Total Asst Time'] = \
                                                                                         (sampled_asst_time
