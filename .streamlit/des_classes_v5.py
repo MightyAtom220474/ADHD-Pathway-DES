@@ -226,7 +226,7 @@ class Model:
             # Start up the referral generator function
             self.env.process(self.generator_patient_referrals())
 
-            # rejections changed to summarise per week
+           
             self.max_triage_wl = self.results_df["Triage WL Posn"].max()
             self.triage_rej = self.results_df["Triage Rejected"].sum()
             self.triage_avg_wait = self.results_df["Q Time Triage"].mean()
