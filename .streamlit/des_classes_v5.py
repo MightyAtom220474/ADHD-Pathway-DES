@@ -226,21 +226,19 @@ class Model:
             # Start up the referral generator function
             self.env.process(self.generator_patient_referrals())
 
-            # capture waiting list position at end of each week
-            # SR comment: I've moved run capturing from here and moved it to the end as was
-            # seeing some odd behaviour in the final result
+            # rejections changed to summarise per week
             self.max_triage_wl = self.results_df["Triage WL Posn"].max()
-            self.triage_rej = self.results_df["Triage Rejected"].sum()
+            self.triage_rej = self.results_df["Triage Rejected"]["Week Number"]==self.week_number.sum()
             self.triage_avg_wait = self.results_df["Q Time Triage"].mean()
             #self.triage_targ_wait = g.target_triage_wait
-            self.pack_rej = self.results_df["Pack Rejected"].sum()
-            self.obs_rej = self.results_df["Obs Rejected"].sum()
+            self.pack_rej = self.results_df["Pack Rejected"]["Week Number"]==self.week_number.sum()
+            self.obs_rej = self.results_df["Obs Rejected"]["Week Number"]==self.week_number.sum()
             self.max_mdt_wl = self.results_df["MDT WL Posn"].max()
-            self.mdt_rej = self.results_df["MDT Rejected"].sum()
+            self.mdt_rej = self.results_df["MDT Rejected"]["Week Number"]==self.week_number.sum()
             self.mdt_avg_wait = self.results_df["Q Time MDT"].mean()
             #self.mdt_targ_wait = g.target_mdt_wait
             self.max_asst_wl = self.results_df["Asst WL Posn"].max()
-            self.asst_rej = self.results_df["Asst Rejected"].sum()
+            self.asst_rej = self.results_df["Asst Rejected"]["Week Number"]==self.week_number.sum()
             self.asst_avg_wait = self.results_df["Q Time Asst"].mean()
             #self.asst_targ_wait = g.target_asst_wait
 
