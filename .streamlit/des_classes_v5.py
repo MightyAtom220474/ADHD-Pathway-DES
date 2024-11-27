@@ -834,7 +834,7 @@ class Trial:
             self.full_results_dfs.append(my_model.results_df)
        
         # Once the trial (i.e. all runs) has completed, print the final results
-        return self.df_trial_results, pd.concat(self.weekly_wl_dfs), self.full_results_df #, pd.concat(self.weekly_mins_dfs)
+        return self.df_trial_results, pd.concat(self.weekly_wl_dfs), self.full_results_dfs #, pd.concat(self.weekly_mins_dfs)
     
 # my_trial = Trial()
 # pd.set_option('display.max_rows', 1000)
