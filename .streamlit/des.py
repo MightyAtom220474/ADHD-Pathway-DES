@@ -130,6 +130,8 @@ if button_run_pressed:
         st.write(df_trial_results)
         #df_trial_results.to_csv('adhd_trial_results.csv')
 
+        df_weekly_stats['Triage Clin Mins'] = df_weekly_stats['Triage Clin Mins']-df_weekly_stats['Triage Clin Mins'].shift(1)
+
         st.write(df_weekly_stats)
 
         df_weekly_wl = df_weekly_stats[['Run','Week Number','Triage WL',
