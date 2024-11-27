@@ -230,7 +230,7 @@ class Model:
             self.max_triage_wl = self.results_df["Triage WL Posn"].max()
             self.triage_rej = self.results_df["Triage Rejected"].sum()
             self.triage_avg_wait = self.results_df["Q Time Triage"].mean()
-            self.triage_tot_clin = self.results_df['Triage Mins Clin'].sum()-self.df_weekly_stats['Triage Clin Mins'].max()
+            self.triage_tot_clin = self.results_df['Triage Mins Clin'].sum()
             #self.triage_targ_wait = g.target_triage_wait
             self.pack_rej = self.results_df["Pack Rejected"].sum()
             self.obs_rej = self.results_df["Obs Rejected"].sum()
@@ -250,7 +250,7 @@ class Model:
                  'Triage WL':self.max_triage_wl,
                  'Triage Rejects':self.triage_rej,
                  'Triage Wait':self.triage_avg_wait,
-                 'Triage Clin Mins':self.triage_tot_clin,
+                 'Triage Clin Mins':self.triage_tot_clin-self.triage_tot_clin.shift(1),
                  #'Triage Target Wait':self.triage_targ_wait,
                  'Pack Rejects':self.pack_rej,
                  'Obs Rejects':self.obs_rej,
