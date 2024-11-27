@@ -797,6 +797,8 @@ class Trial:
 
         self.weekly_wl_dfs = []
 
+        self.full_results_dfs = []
+
     # Method to print out the results from the trial.  In real world models,
     # you'd likely save them as well as (or instead of) printing them
     def print_trial_results(self):
@@ -825,11 +827,14 @@ class Trial:
 
             my_model.df_weekly_stats = pd.DataFrame(my_model.df_weekly_stats)
 
+            my_model.results_df = pd.DataFrame(my_model.results_df)
+            
             my_model.df_weekly_stats['Run'] = run
             self.weekly_wl_dfs.append(my_model.df_weekly_stats)
-
+            self.full_results_dfs.append(my_model.results_df)
+       
         # Once the trial (i.e. all runs) has completed, print the final results
-        return self.df_trial_results, pd.concat(self.weekly_wl_dfs), self.results_df #, pd.concat(self.weekly_mins_dfs)
+        return self.df_trial_results, pd.concat(self.weekly_wl_dfs), self.full_results_df #, pd.concat(self.weekly_mins_dfs)
     
 # my_trial = Trial()
 # pd.set_option('display.max_rows', 1000)
