@@ -136,6 +136,11 @@ if button_run_pressed:
         df_weekly_stats['Asst Clin Mins'] = df_weekly_stats['Asst Clin Mins']-df_weekly_stats['Asst Clin Mins'].shift(1)
         df_weekly_stats['Asst Admin Mins'] = df_weekly_stats['Asst Admin Mins']-df_weekly_stats['Asst Admin Mins'].shift(1)
 
+        # get rid of negative values
+        num = df_weekly_stats._get_numeric_data()
+
+        num[num < 0] = 0
+
         st.write(df_weekly_stats)
 
         df_weekly_wl = df_weekly_stats[['Run','Week Number','Triage WL',
