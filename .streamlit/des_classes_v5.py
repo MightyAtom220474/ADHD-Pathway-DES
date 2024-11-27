@@ -231,6 +231,7 @@ class Model:
             self.triage_rej = self.results_df["Triage Rejected"].sum()
             self.triage_avg_wait = self.results_df["Q Time Triage"].mean()
             self.triage_tot_clin = self.results_df['Triage Mins Clin'].sum()
+            self.triage_tot_admin = self.results_df['Triage Mins Admin'].sum()
             #self.triage_targ_wait = g.target_triage_wait
             self.pack_rej = self.results_df["Pack Rejected"].sum()
             self.obs_rej = self.results_df["Obs Rejected"].sum()
@@ -241,6 +242,8 @@ class Model:
             self.max_asst_wl = self.results_df["Asst WL Posn"].max()
             self.asst_rej = self.results_df["Asst Rejected"].sum()
             self.asst_avg_wait = self.results_df["Q Time Asst"].mean()
+            self.asst_tot_clin = self.results_df['Asst Mins Clin'].sum()
+            self.asst_tot_admin = self.results_df['Asst Mins Admin'].sum()
             #self.asst_targ_wait = g.target_asst_wait
 
             # weekly waiting list positions
@@ -251,6 +254,7 @@ class Model:
                  'Triage Rejects':self.triage_rej,
                  'Triage Wait':self.triage_avg_wait,
                  'Triage Clin Mins':self.triage_tot_clin,
+                 'Triage Admin Mins':self.triage_tot_admin,
                  #'Triage Target Wait':self.triage_targ_wait,
                  'Pack Rejects':self.pack_rej,
                  'Obs Rejects':self.obs_rej,
@@ -261,6 +265,8 @@ class Model:
                  'Asst WL':self.max_asst_wl,
                  'Asst Rejects':self.asst_rej,
                  'Asst Wait':self.asst_avg_wait,
+                 'Asst Clin Mins':self.asst_tot_clin,
+                 'Asst Admin Mins':self.asst_tot_admin,
                  #'Asst Target Wait':self.asst_targ_wait
                  }
                  )

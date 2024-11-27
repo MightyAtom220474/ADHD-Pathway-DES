@@ -130,7 +130,11 @@ if button_run_pressed:
         st.write(df_trial_results)
         #df_trial_results.to_csv('adhd_trial_results.csv')
 
+        # turn mins values from running total to weekly total
         df_weekly_stats['Triage Clin Mins'] = df_weekly_stats['Triage Clin Mins']-df_weekly_stats['Triage Clin Mins'].shift(1)
+        df_weekly_stats['Triage Admin Mins'] = df_weekly_stats['Triage Admin Mins']-df_weekly_stats['Triage Admin Mins'].shift(1)
+        df_weekly_stats['Asst Clin Mins'] = df_weekly_stats['Asst Clin Mins']-df_weekly_stats['Asst Clin Mins'].shift(1)
+        df_weekly_stats['Asst Admin Mins'] = df_weekly_stats['Asst Admin Mins']-df_weekly_stats['Asst Admin Mins'].shift(1)
 
         st.write(df_weekly_stats)
 
