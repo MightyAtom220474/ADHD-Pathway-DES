@@ -262,10 +262,12 @@ class Model:
                  #'Asst Target Wait':self.asst_targ_wait
                  }
                  )
+            
+            self.weekly_results()
 
-            # SR Comment - can remove this as have done in a slightly different way
-            # You will want to remove this and
-            g.weekly_wl_posn = pd.DataFrame.from_dict(self.df_weekly_stats)
+            # # SR Comment - can remove this as have done in a slightly different way
+            # # You will want to remove this and
+            # g.weekly_wl_posn = pd.DataFrame.from_dict(self.df_weekly_stats)
             
             # replenish resources ready for next week
             # SR comment: it seems here if you try to put in an amount that would cause it to exceed
@@ -327,6 +329,13 @@ class Model:
         # as in trial you'll create a new model that starts with the week counter
         # set at 0
         # self.week_number = 0
+
+    def weekly_results(self):
+
+        self.weekly_mins_df = []
+
+        self.weekly_mins_df.append([self.results_df['Week Number'] == self.week_number].pivot_table(index=['Run Number','Week Number'], values=[['Triage Mins Clin','Triage Mins Admin','Asst Mins Clin','Asst Mins Admin']],
+                                 aggfunc='sum'))
 
     # generator function that represents the DES generator for referrals
     def generator_patient_referrals(self):
@@ -828,9 +837,10 @@ class Trial:
             my_model.df_weekly_stats['Run'] = run
 
             self.weekly_wl_dfs.append(my_model.df_weekly_stats)
+            self.weekly_mins_dfs.append(my_model.weekly_mins_df)
 
         # Once the trial (i.e. all runs) has completed, print the final results
-        return self.df_trial_results, pd.concat(self.weekly_wl_dfs)
+        return self.df_trial_results, pd.concat(self.weekly_wl_dfs), pd.concat(self.weekly_mins_dfs)
     
 # my_trial = Trial()
 # pd.set_option('display.max_rows', 1000)
