@@ -825,13 +825,8 @@ class Trial:
 
             my_model.df_weekly_stats = pd.DataFrame(my_model.df_weekly_stats)
 
-            my_model.df_weekly_mins = pd.DataFrame(my_model.weekly_mins_df)
-
             my_model.df_weekly_stats['Run'] = run
             self.weekly_wl_dfs.append(my_model.df_weekly_stats)
-
-            my_model.df_weekly_mins['Run'] = run
-            self.weekly_mins_dfs.append(my_model.weekly_mins_df)
 
         # Once the trial (i.e. all runs) has completed, print the final results
         return self.df_trial_results, pd.concat(self.weekly_wl_dfs), self.results_df #, pd.concat(self.weekly_mins_dfs)
