@@ -250,7 +250,7 @@ class Model:
                  'Triage WL':self.max_triage_wl,
                  'Triage Rejects':self.triage_rej,
                  'Triage Wait':self.triage_avg_wait,
-                 'Triage Clin Mins':self.triage_tot_clin
+                 'Triage Clin Mins':self.triage_tot_clin,
                  #'Triage Target Wait':self.triage_targ_wait,
                  'Pack Rejects':self.pack_rej,
                  'Obs Rejects':self.obs_rej,
