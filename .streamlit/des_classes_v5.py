@@ -230,6 +230,7 @@ class Model:
             self.max_triage_wl = self.results_df["Triage WL Posn"].max()
             self.triage_rej = self.results_df["Triage Rejected"].sum()
             self.triage_avg_wait = self.results_df["Q Time Triage"].mean()
+            self.triage_tot_clin = self.results_df.loc[self.results_df['Week Number'] == self.week_number, 'Triage Mins Clin'].sum()
             #self.triage_targ_wait = g.target_triage_wait
             self.pack_rej = self.results_df["Pack Rejected"].sum()
             self.obs_rej = self.results_df["Obs Rejected"].sum()
@@ -249,6 +250,7 @@ class Model:
                  'Triage WL':self.max_triage_wl,
                  'Triage Rejects':self.triage_rej,
                  'Triage Wait':self.triage_avg_wait,
+                 'Triage Clin Mins':self.triage_tot_clin
                  #'Triage Target Wait':self.triage_targ_wait,
                  'Pack Rejects':self.pack_rej,
                  'Obs Rejects':self.obs_rej,
@@ -797,8 +799,6 @@ class Trial:
 
         self.weekly_wl_dfs = []
 
-        self.full_results_dfs = []
-
     # Method to print out the results from the trial.  In real world models,
     # you'd likely save them as well as (or instead of) printing them
     def print_trial_results(self):
@@ -827,14 +827,12 @@ class Trial:
 
             my_model.df_weekly_stats = pd.DataFrame(my_model.df_weekly_stats)
 
-            my_model.results_df = pd.DataFrame(my_model.results_df)
-            
             my_model.df_weekly_stats['Run'] = run
+
             self.weekly_wl_dfs.append(my_model.df_weekly_stats)
-            self.full_results_dfs.append(my_model.results_df)
-       
+                   
         # Once the trial (i.e. all runs) has completed, print the final results
-        return self.df_trial_results, pd.concat(self.weekly_wl_dfs), self.full_results_dfs #, pd.concat(self.weekly_mins_dfs)
+        return self.df_trial_results, pd.concat(self.weekly_wl_dfs)
     
 # my_trial = Trial()
 # pd.set_option('display.max_rows', 1000)

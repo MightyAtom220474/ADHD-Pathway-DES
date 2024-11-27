@@ -123,7 +123,7 @@ if button_run_pressed:
         pd.set_option('display.max_rows', 1000)
         # Call the run_trial method of our Trial class object
         
-        df_trial_results, df_weekly_stats, full_results_dfs = my_trial.run_trial()
+        df_trial_results, df_weekly_stats = my_trial.run_trial()
 
         # df_trial_results = pd.DataFrame(df_trial_results)
         st.subheader("Summary of Simulation Runs")
@@ -131,8 +131,6 @@ if button_run_pressed:
         #df_trial_results.to_csv('adhd_trial_results.csv')
 
         st.write(df_weekly_stats)
-
-        st.write(full_results_dfs)
 
         df_weekly_wl = df_weekly_stats[['Run','Week Number','Triage WL',
                                         'MDT WL','Asst WL']]
