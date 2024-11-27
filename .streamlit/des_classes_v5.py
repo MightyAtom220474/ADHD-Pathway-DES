@@ -263,8 +263,6 @@ class Model:
                  }
                  )
             
-            self.weekly_results()
-
             # # SR Comment - can remove this as have done in a slightly different way
             # # You will want to remove this and
             # g.weekly_wl_posn = pd.DataFrame.from_dict(self.df_weekly_stats)
@@ -329,12 +327,7 @@ class Model:
         # as in trial you'll create a new model that starts with the week counter
         # set at 0
         # self.week_number = 0
-
-    def weekly_results(self):
-
-        self.weekly_minute_totals_df = pd.DataFrame()
-
-        
+       
     # generator function that represents the DES generator for referrals
     def generator_patient_referrals(self):
 
