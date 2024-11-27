@@ -332,9 +332,10 @@ class Model:
 
     def weekly_results(self):
 
+        # container for results that need to be totalled up weekly
         self.weekly_mins_df = []
-
-        self.weekly_mins_df.append([self.results_df['Week Number'] == self.week_number].pivot_table(index=['Run Number','Week Number'], values=[['Triage Mins Clin','Triage Mins Admin','Asst Mins Clin','Asst Mins Admin']],
+        # append to above pivoted and filtered summary of results_df
+        self.weekly_mins_df.append([self.results_df['Week Number'] == self.week_number].pivot_table(index=['Week Number'], values=[['Triage Mins Clin','Triage Mins Admin','Asst Mins Clin','Asst Mins Admin']],
                                  aggfunc='sum'))
 
     # generator function that represents the DES generator for referrals
@@ -834,9 +835,12 @@ class Trial:
 
             my_model.df_weekly_stats = pd.DataFrame(my_model.df_weekly_stats)
 
-            my_model.df_weekly_stats['Run'] = run
+            my_model.df_weekly_mins = pd.DataFrame(my_model.weekly_mins_df)
 
+            my_model.df_weekly_stats['Run'] = run
             self.weekly_wl_dfs.append(my_model.df_weekly_stats)
+
+            my_model.df_weekly_mins['Run'] = run
             self.weekly_mins_dfs.append(my_model.weekly_mins_df)
 
         # Once the trial (i.e. all runs) has completed, print the final results
