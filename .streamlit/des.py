@@ -471,11 +471,11 @@ if button_run_pressed:
                     df_weekly_clin_filtered = df_weekly_clin_unpivot[
                                         df_weekly_clin_unpivot["variable"]==list_name]
                     
-                    weekly_avg_mins_clin = df_weekly_clin_filtered.groupby(['Week Number',
+                    weekly_avg_hrs_clin = df_weekly_clin_filtered.groupby(['Week Number',
                                                     'variable'])['value'
                                                     ].mean().reset_index()
                     
-                    fig = px.histogram(weekly_avg_mins_clin, 
+                    fig = px.histogram(weekly_avg_hrs_clin, 
                                        x="Week Number",
                                        y='value',
                                        color="green",
@@ -508,11 +508,11 @@ if button_run_pressed:
                     df_weekly_admin_filtered = df_weekly_admin_unpivot[
                                         df_weekly_admin_unpivot["variable"]==list_name]
                     
-                    weekly_avg_mins_admin = df_weekly_admin_filtered.groupby(['Week Number',
+                    weekly_avg_hrs_admin = df_weekly_admin_filtered.groupby(['Week Number',
                                                     'variable'])['value'
                                                     ].mean().reset_index()
                     
-                    fig = px.histogram(weekly_avg_mins_admin, 
+                    fig2 = px.histogram(weekly_avg_hrs_admin, 
                                        x="Week Number",
                                        y='value',
                                        color="blue",
@@ -520,7 +520,7 @@ if button_run_pressed:
                                        title=f'{list_name} by Week')
                    
                     # get rid of 'variable' prefix resulting from df.melt
-                    fig.for_each_annotation(lambda a: a.update(text=a.text.split
+                    fig2.for_each_annotation(lambda a: a.update(text=a.text.split
                                                             ("=")[1]))
                     #fig.for_each_trace(lambda t: t.update(name=t.name.split("=")[1]))
 
@@ -528,9 +528,9 @@ if button_run_pressed:
                     #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
                     #               font=dict(size=20), automargin=True, yref='paper')
                     #     ))
-                    fig.update_layout(title_x=0.2,font=dict(size=10))
+                    fig2.update_layout(title_x=0.2,font=dict(size=10))
                     #fig.
 
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig2, use_container_width=True)
 
                     st.divider()
