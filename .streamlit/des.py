@@ -127,7 +127,7 @@ if button_run_pressed:
 
         # df_trial_results = pd.DataFrame(df_trial_results)
         st.subheader("Summary of Simulation Runs")
-        st.write(df_trial_results)
+        #st.write(df_trial_results)
         #df_trial_results.to_csv('adhd_trial_results.csv')
 
         # turn mins values from running total to weekly total
@@ -141,7 +141,7 @@ if button_run_pressed:
 
         num[num < 0] = 0
 
-        st.write(df_weekly_stats)
+        #st.write(df_weekly_stats)
 
         df_weekly_wl = df_weekly_stats[['Run','Week Number','Triage WL',
                                         'MDT WL','Asst WL']]
@@ -168,6 +168,15 @@ if button_run_pressed:
         df_weekly_wt_unpivot = pd.melt(df_weekly_wt, value_vars=['Triage Wait',
                                         'MDT Wait','Asst Wait'], id_vars=['Run',
                                         'Week Number'])
+        
+        df_weekly_clin = df_weekly_stats[['Run','Week Number','Triage Clin Mins',
+                                        'Asst Clin Mins']]
+        
+        df_weekly_clin_unpivot = pd.melt(df_weekly_clin, value_vars=['Triage Clin Mins',
+                                        'Asst Clin Mins'], id_vars=['Run',
+                                        'Week Number'])
+
+
         tab1, tab2 = st.tabs(["Waiting Lists", "Clinical & Admin"])
 
         with tab1:    
@@ -436,4 +445,47 @@ if button_run_pressed:
 
         with tab2:
 
-           print('Just a test of tabs') 
+            col1, col2 = st.columns(2)
+
+            with col1:
+            
+                for i, list_name in enumerate(df_weekly_clin_unpivot['variable']
+                                            .unique()):
+
+                    if list_name == 'Triage Clin Mins':
+                        section_title = 'Triage'
+                    # elif list_name == 'MDT WL':
+                    #     section_title = 'MDT'
+                    elif list_name == 'Asst Clin Mins':
+                        section_title = 'Assessment'
+
+                    st.subheader(section_title)
+
+                    df_weekly_clin_filtered = df_weekly_clin_unpivot[
+                                        df_weekly_clin_unpivot["variable"]==list_name]
+                    
+                    weekly_avg_mins_clin = df_weekly_clin_filtered.groupby(['Week Number',
+                                                    'variable'])['value'
+                                                    ].mean().reset_index()
+                    
+                    fig = px.histogram(weekly_avg_mins_clin, x="Week Number")
+                   
+                    # get rid of 'variable' prefix resulting from df.melt
+                    fig.for_each_annotation(lambda a: a.update(text=a.text.split
+                                                            ("=")[1]))
+                    #fig.for_each_trace(lambda t: t.update(name=t.name.split("=")[1]))
+
+                    # fig.update_layout(
+                    #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
+                    #               font=dict(size=20), automargin=True, yref='paper')
+                    #     ))
+                    fig.update_layout(title_x=0.2,font=dict(size=10))
+                    #fig.
+
+                    st.plotly_chart(fig, use_container_width=True)
+
+                    st.divider()
+
+                with col2:
+
+                    st.write('Not done yet')
