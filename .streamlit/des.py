@@ -478,6 +478,7 @@ if button_run_pressed:
                     fig = px.histogram(weekly_avg_hrs_clin, 
                                        x="Week Number",
                                        y='value',
+                                       xbins=sim_duration_input,
                                        labels={"value": "Hours"},
                                        title=f'{list_name} by Week')
                    
@@ -514,6 +515,7 @@ if button_run_pressed:
                     fig2 = px.histogram(weekly_avg_hrs_admin, 
                                        x="Week Number",
                                        y='value',
+                                       xbins=sim_duration_input,
                                        labels={"value": "Hours"},
                                        title=f'{list_name} by Week')
                    
