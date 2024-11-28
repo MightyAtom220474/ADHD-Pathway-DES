@@ -468,7 +468,7 @@ if button_run_pressed:
                                                     'variable'])['value'
                                                     ].mean().reset_index()
                     
-                    fig = px.histogram(weekly_avg_mins_clin, x="Week Number")
+                    fig = px.histogram(weekly_avg_mins_clin, x="Week Number",y='value')
                    
                     # get rid of 'variable' prefix resulting from df.melt
                     fig.for_each_annotation(lambda a: a.update(text=a.text.split
