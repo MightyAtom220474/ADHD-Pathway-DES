@@ -480,7 +480,7 @@ if button_run_pressed:
                                        y='value',
                                        nbins=sim_duration_input,
                                        labels={"value": "Hours"},
-                                       color='variable',
+                                       color_discrete_sequence=["blue"],
                                        title=f'{list_name} by Week')
                    
                     # get rid of 'variable' prefix resulting from df.melt
@@ -519,7 +519,7 @@ if button_run_pressed:
                                        y='value',
                                        nbins=sim_duration_input,
                                        labels={"value": "Hours"},
-                                       color='variable',
+                                       color_discrete_sequence=["green"],
                                        title=f'{list_name} by Week')
                    
                     # get rid of 'variable' prefix resulting from df.melt
