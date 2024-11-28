@@ -168,265 +168,272 @@ if button_run_pressed:
         df_weekly_wt_unpivot = pd.melt(df_weekly_wt, value_vars=['Triage Wait',
                                         'MDT Wait','Asst Wait'], id_vars=['Run',
                                         'Week Number'])
+        tab1, tab2 = st.tabs(["Waiting Lists", "Clinical & Admin"])
 
-        col1, col2, col3 = st.columns(3)
+        with tab1:    
 
-        with col1:
-        
-            for i, list_name in enumerate(df_weekly_wl_unpivot['variable']
-                                          .unique()):
+            col1, col2, col3 = st.columns(3)
 
-                if list_name == 'Triage WL':
-                    section_title = 'Triage'
-                elif list_name == 'MDT WL':
-                    section_title = 'MDT'
-                elif list_name == 'Asst WL':
-                    section_title = 'Assessment'
-
-                st.subheader(section_title)
-
-                df_weekly_wl_filtered = df_weekly_wl_unpivot[
-                                    df_weekly_wl_unpivot["variable"]==list_name]
-                
-                fig = px.line(
-                            df_weekly_wl_filtered,
-                            x="Week Number",
-                            color="Run",
-                            #line_dash="Run",
-                            y="value",
-                            labels={
-                                    "value": "Waiters",
-                                    #"sepal_width": "Sepal Width (cm)",
-                                    #"species": "Species of Iris"
-                                    },
-                            #facet_row="variable", # show each facet as a row
-                            #facet_col="variable", # show each facet as a column
-                            height=500,
-                            width=350,
-                            title=f'{list_name} by Week'
-                            )
-                
-                fig.update_traces(line=dict(dash='dot'))
-                
-                # get the average waiting list across all the runs
-                weekly_avg_wl = df_weekly_wl_filtered.groupby(['Week Number',
-                                                'variable'])['value'].mean(
-                                                ).reset_index()
-                
-                fig.add_trace(
-                            go.Scatter(x=weekly_avg_wl["Week Number"],
-                                       y=weekly_avg_wl["value"], name='Average',
-                                       line=dict(width=3,color='blue')))
-    
-                
-                # get rid of 'variable' prefix resulting from df.melt
-                fig.for_each_annotation(lambda a: a.update(text=a.text.split
-                                                           ("=")[1]))
-                #fig.for_each_trace(lambda t: t.update(name=t.name.split("=")[1]))
-
-                # fig.update_layout(
-                #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
-                #               font=dict(size=20), automargin=True, yref='paper')
-                #     ))
-                fig.update_layout(title_x=0.2,font=dict(size=10))
-                #fig.
-
-                st.plotly_chart(fig, use_container_width=True)
-
-                st.divider()
-
-        with col2:
-        
-            for i, list_name in enumerate(df_weekly_rej_unpivot['variable']
-                                          .unique()):
+            with col1:
             
-                df_weekly_rej_filtered = df_weekly_rej_unpivot[
-                                df_weekly_rej_unpivot["variable"]==list_name]
-                
-                st.subheader('')
+                for i, list_name in enumerate(df_weekly_wl_unpivot['variable']
+                                            .unique()):
 
-                fig2 = px.line(
-                            df_weekly_rej_filtered,
-                            x="Week Number",
-                            color="Run",
-                            #line_dash="Run",
-                            y="value",
-                            labels={
-                                    "value": "Waiters",
-                                    #"sepal_width": "Sepal Width (cm)",
-                                    #"species": "Species of Iris"
-                                    },
-                            #facet_row="variable", # show each facet as a row
-                            #facet_col="variable", # show each facet as a column
-                            height=500,
-                            width=350,
-                            title=f'{list_name} by Week'
-                            )
-                
-                fig2.update_traces(line=dict(dash='dot'))
-                
-                # get the average waiting list across all the runs
-                weekly_avg_rej = df_weekly_rej_filtered.groupby(['Week Number',
-                                                'variable'])['value'].mean(
-                                                ).reset_index()
-                
-                fig2.add_trace(
-                            go.Scatter(x=weekly_avg_rej["Week Number"],y=
-                                       weekly_avg_rej["value"], name='Average',
-                                       line=dict(width=3,color='blue')))
-    
-                
-                # get rid of 'variable' prefix resulting from df.melt
-                fig2.for_each_annotation(lambda a: a.update(text=a.text.split
-                                                                    ("=")[1]))
-                #fig.for_each_trace(lambda t: t.update(name=t.name.split("=")[1]))
+                    if list_name == 'Triage WL':
+                        section_title = 'Triage'
+                    elif list_name == 'MDT WL':
+                        section_title = 'MDT'
+                    elif list_name == 'Asst WL':
+                        section_title = 'Assessment'
 
-                # fig.update_layout(
-                #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
-                #       font=dict(size=20), automargin=True, yref='paper')
-                #     ))
-                fig2.update_layout(title_x=0.2,font=dict(size=10))
-                #fig.
+                    st.subheader(section_title)
 
-                st.plotly_chart(fig2, use_container_width=True)
-
-                st.divider()
-
-    with col3:
+                    df_weekly_wl_filtered = df_weekly_wl_unpivot[
+                                        df_weekly_wl_unpivot["variable"]==list_name]
+                    
+                    fig = px.line(
+                                df_weekly_wl_filtered,
+                                x="Week Number",
+                                color="Run",
+                                #line_dash="Run",
+                                y="value",
+                                labels={
+                                        "value": "Waiters",
+                                        #"sepal_width": "Sepal Width (cm)",
+                                        #"species": "Species of Iris"
+                                        },
+                                #facet_row="variable", # show each facet as a row
+                                #facet_col="variable", # show each facet as a column
+                                height=500,
+                                width=350,
+                                title=f'{list_name} by Week'
+                                )
+                    
+                    fig.update_traces(line=dict(dash='dot'))
+                    
+                    # get the average waiting list across all the runs
+                    weekly_avg_wl = df_weekly_wl_filtered.groupby(['Week Number',
+                                                    'variable'])['value'].mean(
+                                                    ).reset_index()
+                    
+                    fig.add_trace(
+                                go.Scatter(x=weekly_avg_wl["Week Number"],
+                                        y=weekly_avg_wl["value"], name='Average',
+                                        line=dict(width=3,color='blue')))
         
-            for i, list_name in enumerate(df_weekly_wt_unpivot['variable']
-                                          .unique()):
+                    
+                    # get rid of 'variable' prefix resulting from df.melt
+                    fig.for_each_annotation(lambda a: a.update(text=a.text.split
+                                                            ("=")[1]))
+                    #fig.for_each_trace(lambda t: t.update(name=t.name.split("=")[1]))
+
+                    # fig.update_layout(
+                    #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
+                    #               font=dict(size=20), automargin=True, yref='paper')
+                    #     ))
+                    fig.update_layout(title_x=0.2,font=dict(size=10))
+                    #fig.
+
+                    st.plotly_chart(fig, use_container_width=True)
+
+                    st.divider()
+
+            with col2:
             
-                df_weekly_wt_filtered = df_weekly_wt_unpivot[
-                                    df_weekly_wt_unpivot["variable"]==list_name]
-
-                st.subheader('')
+                for i, list_name in enumerate(df_weekly_rej_unpivot['variable']
+                                            .unique()):
                 
-                if list_name == 'Triage Wait':
-                    y_var_targ = triage_target_input
-                elif list_name == 'MDT Wait':
-                    y_var_targ = mdt_target_input
-                elif list_name == 'Asst Wait':
-                    y_var_targ = asst_target_input
+                    df_weekly_rej_filtered = df_weekly_rej_unpivot[
+                                    df_weekly_rej_unpivot["variable"]==list_name]
+                    
+                    st.subheader('')
+
+                    fig2 = px.line(
+                                df_weekly_rej_filtered,
+                                x="Week Number",
+                                color="Run",
+                                #line_dash="Run",
+                                y="value",
+                                labels={
+                                        "value": "Waiters",
+                                        #"sepal_width": "Sepal Width (cm)",
+                                        #"species": "Species of Iris"
+                                        },
+                                #facet_row="variable", # show each facet as a row
+                                #facet_col="variable", # show each facet as a column
+                                height=500,
+                                width=350,
+                                title=f'{list_name} by Week'
+                                )
+                    
+                    fig2.update_traces(line=dict(dash='dot'))
+                    
+                    # get the average waiting list across all the runs
+                    weekly_avg_rej = df_weekly_rej_filtered.groupby(['Week Number',
+                                                    'variable'])['value'].mean(
+                                                    ).reset_index()
+                    
+                    fig2.add_trace(
+                                go.Scatter(x=weekly_avg_rej["Week Number"],y=
+                                        weekly_avg_rej["value"], name='Average',
+                                        line=dict(width=3,color='blue')))
+        
+                    
+                    # get rid of 'variable' prefix resulting from df.melt
+                    fig2.for_each_annotation(lambda a: a.update(text=a.text.split
+                                                                        ("=")[1]))
+                    #fig.for_each_trace(lambda t: t.update(name=t.name.split("=")[1]))
+
+                    # fig.update_layout(
+                    #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
+                    #       font=dict(size=20), automargin=True, yref='paper')
+                    #     ))
+                    fig2.update_layout(title_x=0.2,font=dict(size=10))
+                    #fig.
+
+                    st.plotly_chart(fig2, use_container_width=True)
+
+                    st.divider()
+
+        with col3:
             
-                fig3 = px.line(
-                            df_weekly_wt_filtered,
-                            x="Week Number",
-                            color="Run",
-                            #line_dash="Run",
-                            y="value",
-                            labels={
-                                    "value": "Avg Wait(weeks)",
-                                    #"sepal_width": "Sepal Width (cm)",
-                                    #"species": "Species of Iris"
-                                    },
-                            #facet_row="variable", # show each facet as a row
-                            #facet_col="variable", # show each facet as a column
-                            height=500,
-                            width=350,
-                            title=f'{list_name} by Week'
-                            )
+                for i, list_name in enumerate(df_weekly_wt_unpivot['variable']
+                                            .unique()):
                 
-                fig3.update_traces(line=dict(dash='dot'))
+                    df_weekly_wt_filtered = df_weekly_wt_unpivot[
+                                        df_weekly_wt_unpivot["variable"]==list_name]
+
+                    st.subheader('')
+                    
+                    if list_name == 'Triage Wait':
+                        y_var_targ = triage_target_input
+                    elif list_name == 'MDT Wait':
+                        y_var_targ = mdt_target_input
+                    elif list_name == 'Asst Wait':
+                        y_var_targ = asst_target_input
                 
-                weekly_avg_wt = df_weekly_wt_filtered.groupby(['Week Number',
-                                                'variable'])['value'
-                                                ].mean().reset_index()
+                    fig3 = px.line(
+                                df_weekly_wt_filtered,
+                                x="Week Number",
+                                color="Run",
+                                #line_dash="Run",
+                                y="value",
+                                labels={
+                                        "value": "Avg Wait(weeks)",
+                                        #"sepal_width": "Sepal Width (cm)",
+                                        #"species": "Species of Iris"
+                                        },
+                                #facet_row="variable", # show each facet as a row
+                                #facet_col="variable", # show each facet as a column
+                                height=500,
+                                width=350,
+                                title=f'{list_name} by Week'
+                                )
+                    
+                    fig3.update_traces(line=dict(dash='dot'))
+                    
+                    weekly_avg_wt = df_weekly_wt_filtered.groupby(['Week Number',
+                                                    'variable'])['value'
+                                                    ].mean().reset_index()
 
-                               
-                fig3.add_trace(
-                            go.Scatter(x=weekly_avg_wt["Week Number"],
-                                       y=weekly_avg_wt["value"],
-                                       name='Average',line=dict(width=3,
-                                       color='red')))
-    
-                fig3.add_trace(
-                            go.Scatter(x=weekly_avg_wt["Week Number"],
-                                       y=np.repeat(y_var_targ,g.sim_duration),
-                                       name='Target',line=dict(width=3,
-                                       color='green')))
-                
-                # get rid of 'variable' prefix resulting from df.melt
-                fig3.for_each_annotation(lambda a: a.update(text=a.text.split(
-                                                                    "=")[1]))
-                #fig.for_each_trace(lambda t: t.update(name=t.name.split("=")[1]))
+                                
+                    fig3.add_trace(
+                                go.Scatter(x=weekly_avg_wt["Week Number"],
+                                        y=weekly_avg_wt["value"],
+                                        name='Average',line=dict(width=3,
+                                        color='red')))
+        
+                    fig3.add_trace(
+                                go.Scatter(x=weekly_avg_wt["Week Number"],
+                                        y=np.repeat(y_var_targ,g.sim_duration),
+                                        name='Target',line=dict(width=3,
+                                        color='green')))
+                    
+                    # get rid of 'variable' prefix resulting from df.melt
+                    fig3.for_each_annotation(lambda a: a.update(text=a.text.split(
+                                                                        "=")[1]))
+                    #fig.for_each_trace(lambda t: t.update(name=t.name.split("=")[1]))
 
-                # fig.update_layout(
-                #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week,
-                #       font=dict(size=20), automargin=True, yref='paper')
-                #     ))
-                fig3.update_layout(title_x=0.2,font=dict(size=10))
+                    # fig.update_layout(
+                    #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week,
+                    #       font=dict(size=20), automargin=True, yref='paper')
+                    #     ))
+                    fig3.update_layout(title_x=0.2,font=dict(size=10))
 
-                ##fig3.add_hline(y=y_var_targ, annotation_text="mean")
-                
-                st.plotly_chart(fig3, use_container_width=True)
+                    ##fig3.add_hline(y=y_var_targ, annotation_text="mean")
+                    
+                    st.plotly_chart(fig3, use_container_width=True)
 
-                st.divider()
+                    st.divider()
 
 
-        # fig2 = px.line(
-        #                 df_weekly_wl_unpivot,
-        #                 x="Week Number",
-        #                 color="Run",
-        #                 y="value",
-        #                 labels={
-        #                         "value": "Waiters",
-        #                         #"sepal_width": "Sepal Width (cm)",
-        #                         #"species": "Species of Iris"
-        #                         },
-        #                 #facet_row="variable", # show each facet as a row
-        #                 #facet_col="variable", # show each facet as a column
-        #                 height=800,
-                        
-        #                 )
-        # # get rid of 'variable' prefix resulting from df.melt
-        # fig2.for_each_annotation(lambda a: a.update(text=a.text.split("=")[1]))
-        # #fig.for_each_trace(lambda t: t.update(name=t.name.split("=")[1]))
+            # fig2 = px.line(
+            #                 df_weekly_wl_unpivot,
+            #                 x="Week Number",
+            #                 color="Run",
+            #                 y="value",
+            #                 labels={
+            #                         "value": "Waiters",
+            #                         #"sepal_width": "Sepal Width (cm)",
+            #                         #"species": "Species of Iris"
+            #                         },
+            #                 #facet_row="variable", # show each facet as a row
+            #                 #facet_col="variable", # show each facet as a column
+            #                 height=800,
+                            
+            #                 )
+            # # get rid of 'variable' prefix resulting from df.melt
+            # fig2.for_each_annotation(lambda a: a.update(text=a.text.split("=")[1]))
+            # #fig.for_each_trace(lambda t: t.update(name=t.name.split("=")[1]))
 
-        # # fig.update_layout(
-        # #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
-        #                   font=dict(size=20), automargin=True, yref='paper')
-        # #     ))
-        # fig2.update_layout(title_x=0.4)
-        # #fig.
+            # # fig.update_layout(
+            # #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
+            #                   font=dict(size=20), automargin=True, yref='paper')
+            # #     ))
+            # fig2.update_layout(title_x=0.4)
+            # #fig.
 
-        # st.plotly_chart(fig2, use_container_width=True)
-        # # with col1:
-        # #     st.write(df_trial_results)
+            # st.plotly_chart(fig2, use_container_width=True)
+            # # with col1:
+            # #     st.write(df_trial_results)
 
-        #     @st.fragment
-        #     def download_1():
-        #         st.download_button(
-        #             "Click here to download the data in a csv format",
-        #             df_trial_results.to_csv().encode('utf-8'),
-        #             f"trial_summary_{g.number_of_clinicians}_clinicians_{
-        #             g.mean_referrals}_referrals.csv","text/csv")
-        #     download_1()
+            #     @st.fragment
+            #     def download_1():
+            #         st.download_button(
+            #             "Click here to download the data in a csv format",
+            #             df_trial_results.to_csv().encode('utf-8'),
+            #             f"trial_summary_{g.number_of_clinicians}_clinicians_{
+            #             g.mean_referrals}_referrals.csv","text/csv")
+            #     download_1()
 
-        # fig = px.line(weekly_wl_position,x="Week Number" ,y="Waiting List",
-        #               color="Run Number",
-        #               title='ADHD Diagnosis Waiting List by Week')
+            # fig = px.line(weekly_wl_position,x="Week Number" ,y="Waiting List",
+            #               color="Run Number",
+            #               title='ADHD Diagnosis Waiting List by Week')
 
-        # fig.update_traces(line=dict(color="Blue", width=0.5))
+            # fig.update_traces(line=dict(color="Blue", width=0.5))
 
-        # fig.update_layout(title_x=0.4)
+            # fig.update_layout(title_x=0.4)
 
-        # fig.add_trace(
-        #     go.Scatter(x=weekly_avg_wl["Week Number"],y=weekly_avg_wl[
-        #                               "Waiting List"], name='Average'))
+            # fig.add_trace(
+            #     go.Scatter(x=weekly_avg_wl["Week Number"],y=weekly_avg_wl[
+            #                               "Waiting List"], name='Average'))
 
-        # fig.update_layout(xaxis_title='Week Number',
-        #                 yaxis_title='Patients Waiting')
+            # fig.update_layout(xaxis_title='Week Number',
+            #                 yaxis_title='Patients Waiting')
 
-        # with col2:
-        #     st.plotly_chart(fig, use_container_width=True)
+            # with col2:
+            #     st.plotly_chart(fig, use_container_width=True)
 
-        #     @st.fragment
-        #     def download_2():
-        #         # Create an in-memory buffer
-        #         buffer = io.BytesIO()
-        #         fig.write_image(file=buffer,format='pdf')
-        #         st.download_button(label='Click here to Download Chart as PDF'
-        #         ,data=buffer, file_name='waiting_list',
-        #         mime='application/octet-stream')
-        #     download_2()
+            #     @st.fragment
+            #     def download_2():
+            #         # Create an in-memory buffer
+            #         buffer = io.BytesIO()
+            #         fig.write_image(file=buffer,format='pdf')
+            #         st.download_button(label='Click here to Download Chart as PDF'
+            #         ,data=buffer, file_name='waiting_list',
+            #         mime='application/octet-stream')
+            #     download_2()
+
+        with tab2:
+
+           print('Just a test of tabs') 
