@@ -131,10 +131,10 @@ if button_run_pressed:
         #df_trial_results.to_csv('adhd_trial_results.csv')
 
         # turn mins values from running total to weekly total
-        df_weekly_stats['Triage Clin Mins'] = df_weekly_stats['Triage Clin Mins']-df_weekly_stats['Triage Clin Mins'].shift(1)
-        df_weekly_stats['Triage Admin Mins'] = df_weekly_stats['Triage Admin Mins']-df_weekly_stats['Triage Admin Mins'].shift(1)
-        df_weekly_stats['Asst Clin Mins'] = df_weekly_stats['Asst Clin Mins']-df_weekly_stats['Asst Clin Mins'].shift(1)
-        df_weekly_stats['Asst Admin Mins'] = df_weekly_stats['Asst Admin Mins']-df_weekly_stats['Asst Admin Mins'].shift(1)
+        df_weekly_stats['Triage Clin Hrs'] = (df_weekly_stats['Triage Clin Mins']-df_weekly_stats['Triage Clin Mins'].shift(1))/60
+        df_weekly_stats['Triage Admin Hrs'] = (df_weekly_stats['Triage Admin Mins']-df_weekly_stats['Triage Admin Mins'].shift(1))/60
+        df_weekly_stats['Asst Clin Hrs'] = (df_weekly_stats['Asst Clin Mins']-df_weekly_stats['Asst Clin Mins'].shift(1))/60
+        df_weekly_stats['Asst Admin Hrs'] = (df_weekly_stats['Asst Admin Mins']-df_weekly_stats['Asst Admin Mins'].shift(1))/60
 
         # get rid of negative values
         num = df_weekly_stats._get_numeric_data()
@@ -169,11 +169,18 @@ if button_run_pressed:
                                         'MDT Wait','Asst Wait'], id_vars=['Run',
                                         'Week Number'])
         
-        df_weekly_clin = df_weekly_stats[['Run','Week Number','Triage Clin Mins',
-                                        'Asst Clin Mins']]
+        df_weekly_clin = df_weekly_stats[['Run','Week Number','Triage Clin Hrs',
+                                        'Asst Clin Hrs']]
         
-        df_weekly_clin_unpivot = pd.melt(df_weekly_clin, value_vars=['Triage Clin Mins',
-                                        'Asst Clin Mins'], id_vars=['Run',
+        df_weekly_clin_unpivot = pd.melt(df_weekly_clin, value_vars=['Triage Clin Hrs',
+                                        'Asst Clin Hrs'], id_vars=['Run',
+                                        'Week Number'])
+        
+        df_weekly_admin = df_weekly_stats[['Run','Week Number','Triage Admin Hrs',
+                                        'Asst Admin Hrs']]
+        
+        df_weekly_admin_unpivot = pd.melt(df_weekly_admin, value_vars=['Triage Admin Hrs',
+                                        'Asst Admin Hrs'], id_vars=['Run',
                                         'Week Number'])
 
 
@@ -452,11 +459,11 @@ if button_run_pressed:
                 for i, list_name in enumerate(df_weekly_clin_unpivot['variable']
                                             .unique()):
 
-                    if list_name == 'Triage Clin Mins':
+                    if list_name == 'Triage Clin Hrs':
                         section_title = 'Triage'
                     # elif list_name == 'MDT WL':
                     #     section_title = 'MDT'
-                    elif list_name == 'Asst Clin Mins':
+                    elif list_name == 'Asst Clin Hrs':
                         section_title = 'Assessment'
 
                     st.subheader(section_title)
@@ -468,7 +475,12 @@ if button_run_pressed:
                                                     'variable'])['value'
                                                     ].mean().reset_index()
                     
-                    fig = px.histogram(weekly_avg_mins_clin, x="Week Number",y='value')
+                    fig = px.histogram(weekly_avg_mins_clin, 
+                                       x="Week Number",
+                                       y='value',
+                                       color="green"
+                                       labels={"value": "Hours",},
+                                       title=f'{list_name} by Week')
                    
                     # get rid of 'variable' prefix resulting from df.melt
                     fig.for_each_annotation(lambda a: a.update(text=a.text.split
@@ -486,6 +498,39 @@ if button_run_pressed:
 
                     st.divider()
 
-                with col2:
+            with col2:
+            
+                for i, list_name in enumerate(df_weekly_admin_unpivot['variable']
+                                            .unique()):
 
-                    st.write('Not done yet')
+                    st.subheader('')                   
+                    
+                    df_weekly_admin_filtered = df_weekly_admin_unpivot[
+                                        df_weekly_admin_unpivot["variable"]==list_name]
+                    
+                    weekly_avg_mins_admin = df_weekly_admin_filtered.groupby(['Week Number',
+                                                    'variable'])['value'
+                                                    ].mean().reset_index()
+                    
+                    fig = px.histogram(weekly_avg_mins_admin, 
+                                       x="Week Number",
+                                       y='value',
+                                       color="blue"
+                                       labels={"value": "Hours",},
+                                       title=f'{list_name} by Week')
+                   
+                    # get rid of 'variable' prefix resulting from df.melt
+                    fig.for_each_annotation(lambda a: a.update(text=a.text.split
+                                                            ("=")[1]))
+                    #fig.for_each_trace(lambda t: t.update(name=t.name.split("=")[1]))
+
+                    # fig.update_layout(
+                    #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
+                    #               font=dict(size=20), automargin=True, yref='paper')
+                    #     ))
+                    fig.update_layout(title_x=0.2,font=dict(size=10))
+                    #fig.
+
+                    st.plotly_chart(fig, use_container_width=True)
+
+                    st.divider()
