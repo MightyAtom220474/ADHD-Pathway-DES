@@ -478,7 +478,7 @@ if button_run_pressed:
                     fig = px.histogram(weekly_avg_mins_clin, 
                                        x="Week Number",
                                        y='value',
-                                       color="green"
+                                       color="green",
                                        labels={"value": "Hours",},
                                        title=f'{list_name} by Week')
                    
@@ -515,7 +515,7 @@ if button_run_pressed:
                     fig = px.histogram(weekly_avg_mins_admin, 
                                        x="Week Number",
                                        y='value',
-                                       color="blue"
+                                       color="blue",
                                        labels={"value": "Hours",},
                                        title=f'{list_name} by Week')
                    
