@@ -480,6 +480,7 @@ if button_run_pressed:
                                        y='value',
                                        nbins=sim_duration_input,
                                        labels={"value": "Hours"},
+                                       color='variable',
                                        title=f'{list_name} by Week')
                    
                     # get rid of 'variable' prefix resulting from df.melt
@@ -518,6 +519,7 @@ if button_run_pressed:
                                        y='value',
                                        nbins=sim_duration_input,
                                        labels={"value": "Hours"},
+                                       color='variable',
                                        title=f'{list_name} by Week')
                    
                     # get rid of 'variable' prefix resulting from df.melt
