@@ -478,7 +478,7 @@ if button_run_pressed:
                     fig = px.histogram(weekly_avg_hrs_clin, 
                                        x="Week Number",
                                        y='value',
-                                       xbins=sim_duration_input,
+                                       nbins=sim_duration_input,
                                        labels={"value": "Hours"},
                                        title=f'{list_name} by Week')
                    
@@ -491,7 +491,8 @@ if button_run_pressed:
                     #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
                     #               font=dict(size=20), automargin=True, yref='paper')
                     #     ))
-                    fig.update_layout(title_x=0.2,font=dict(size=10))
+                    fig.update_layout(title_x=0.2,font=dict(size=10),bargap=0.2)
+                    fig.update_traces(marker_line_color='black', marker_line_width=1)
                     #fig.
 
                     st.plotly_chart(fig, use_container_width=True)
@@ -515,7 +516,7 @@ if button_run_pressed:
                     fig2 = px.histogram(weekly_avg_hrs_admin, 
                                        x="Week Number",
                                        y='value',
-                                       xbins=sim_duration_input,
+                                       nbins=sim_duration_input,
                                        labels={"value": "Hours"},
                                        title=f'{list_name} by Week')
                    
@@ -528,7 +529,8 @@ if button_run_pressed:
                     #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
                     #               font=dict(size=20), automargin=True, yref='paper')
                     #     ))
-                    fig2.update_layout(title_x=0.2,font=dict(size=10))
+                    fig2.update_layout(title_x=0.2,font=dict(size=10),bargap=0.2)
+                    fig2.update_traces(marker_line_color='black', marker_line_width=1)
                     #fig.
 
                     st.plotly_chart(fig2, use_container_width=True)
