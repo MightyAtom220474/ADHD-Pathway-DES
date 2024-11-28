@@ -479,7 +479,7 @@ if button_run_pressed:
                                        x="Week Number",
                                        y='value',
                                        color="green",
-                                       labels={"value": "Hours",},
+                                       labels={"value": "Hours"},
                                        title=f'{list_name} by Week')
                    
                     # get rid of 'variable' prefix resulting from df.melt
@@ -516,7 +516,7 @@ if button_run_pressed:
                                        x="Week Number",
                                        y='value',
                                        color="blue",
-                                       labels={"value": "Hours",},
+                                       labels={"value": "Hours"},
                                        title=f'{list_name} by Week')
                    
                     # get rid of 'variable' prefix resulting from df.melt
