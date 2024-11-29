@@ -462,7 +462,9 @@ class Model:
             p = Patient(self.patient_counter)
             p.week_added = week_number
 
-            self.results_df.at(p.id, 'Referral Time Screen') = self.random_number(g.referral_screen_time,g.std_dev)
+            self.referral_time_screen = self.random_number(g.referral_screen_time,g.std_dev)
+
+            self.results_df.at(p.id, 'Referral Time Screen') = self.referral_time_screen
 
             # print(f'Week {week_number}: Patient number {p.id} created')
 
