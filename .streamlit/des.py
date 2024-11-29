@@ -631,6 +631,8 @@ if button_run_pressed:
                 for i, list_name in enumerate(df_weekly_col2_unpivot['variable']
                                             .unique()):
 
+                    st.subheader('')
+                    
                     df_weekly_col2_filtered = df_weekly_col2_unpivot[
                                         df_weekly_col2_unpivot["variable"]==list_name]
                     
