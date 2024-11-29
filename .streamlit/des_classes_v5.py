@@ -26,48 +26,56 @@ class g:
     mean_referrals_pw = 60
     referral_rejection_rate = 0.05 # % of referrals rejected, assume 5%
     base_waiting_list = 2741 # current number of patients on waiting list
+    referral_screen_time = 15
 
     # Triage
     target_triage_wait = 4 # triage within 4 weeks
     triage_waiting_list = 0 # number waiting for triage
     triage_rejection_rate = 0.05 # % rejected at triage, assume 5%
     triage_resource = 48 # number of triage slots p/w @ 10 mins
-    triage_clin_time = 75 # number of mins for clinician to do triage
+    triage_clin_time = 60 # number of mins for clinician to do triage
     triage_max_clin_time = 90 # maximum time it takes clin to do triage
-    triage_admin_time = 60 # number of mins for admin to do triage
-    triage_max_admin_time = 75 # maximum time it takes admin to do triage
-    total_triage_clinical_time = 0 # clinical time used on triages p/w
-    total_triage_admin_time = 0 # # admin time used on triages p/w
+    triage_admin_time = 15 # number of mins of admin to do triage
+    triage_max_admin_time = 25 # maximum time it takes admin to do triage
+    triage_discharge_time = 45 # time taken if discharged at triage
 
     # School/Home Assesment Pack
     target_pack_wait = 3 # pack to be returned within 3 weeks
     pack_rejection_rate = 0.03 # % rejected based on pack assume 3%
-
+    pack_admin_time = 30 # B4 admin sending out pack
+    
     # QB and Observations
     target_obs_wait = 4 # QB and School obs to be completed within 4 weeks
     obs_rejection_rate = 0.02 # % rejected due to obs not taking place assume 1%
+    qb_test_time = 90 # tike taken by B4 to do QB and write up
+    school_obs_time = 180 # time taken for B4 to do obs incl travel
 
     # MDT
     target_mdt_wait = 1 # how long did it take to be reviewed at MDT, assume 1 week
     mdt_rejection_rate = 0.05 # % rejected at MDT, assume 5%
-    mdt_resource = 25 # no. of MDT slots p/w, assume 1 mdt per day & review 5 cases
+    mdt_resource = 6 # no. of MDT slots p/w, assume 1 mdt/wk @1hr & review 6 cases
+    mdt_meet_time = 60 # number of mins to do MDT
+    mdt_prep_time = 90 # time take for B4 to prep case for MDT
 
     # Assessment
     target_asst_wait = 4 # assess within 4 weeks
     asst_resource = 62 # number of assessment slots p/w @ 60 mins
     asst_clin_time = 90 # number of mins for clinician to do asst
     asst_max_clin_time = 90 # maximum time it takes clin to do asst
-    asst_admin_time = 60 # number of mins for admin to do asst
+    asst_admin_time = 90 # number of mins of admin following asst
     asst_max_admin_time = 90 # maximum time it takes admin to do asst
     asst_rejection_rate = 0.01 # % found not to have ADHD, assume 1%
 
     # Diagnosis
     accepted_into_service = 0 # number accepted into service
-    rejected_from_service = 0 # number rejected from service
+    rejected_from_service = 0 # number rejected from service#
+    diag_time_disch = 90 # time taken after asst if discharged
+    diag_time_accept = 150 # time taken after asst if accepted
 
     # Simulation
     sim_duration = 52
     number_of_runs = 10
+    std_dev = 3 # used for randomising activity times
 
     # Result storage
     all_results = []
@@ -183,6 +191,13 @@ class Model:
         self.mean_q_time_triage = 0
         self.mean_q_time_mdt = 0
         self.mean_q_time_asst = 0
+
+    # random number generator for activity times
+    def random_normal(mean, std_dev):
+        while True:
+            activity_time = random.gauss(mean, std_dev)
+            if activity_time > 0:
+                return activity_time
 
     def week_runner(self,number_of_weeks):
 
