@@ -209,7 +209,7 @@ class Model:
         self.mean_q_time_asst = 0
 
     # random number generator for activity times
-    def random_normal(mean, std_dev):
+    def random_normal(self, mean, std_dev):
         while True:
             activity_time = random.gauss(mean, std_dev)
             if activity_time > 0:
