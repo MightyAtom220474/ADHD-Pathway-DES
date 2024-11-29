@@ -561,7 +561,7 @@ if button_run_pressed:
 
                 st.subheader('')
 
-                df_triage_rej_avg = df_weekly_triage_rej.groupby(['Week Number'])['Triage Admin Hrs'].mean().reset_index()
+                df_triage_rej_avg = df_weekly_triage_rej.groupby(['Week Number'])['Triage Reject Hrs'].mean().reset_index()
                 
                 fig = px.histogram(df_triage_rej_avg, 
                                     x='Week Number',
