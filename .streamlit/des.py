@@ -757,7 +757,8 @@ if button_run_pressed:
                                 x='Week Number',
                                 y='value',
                                 nbins=sim_duration_input,
-                                labels={'value': 'Hours'},
+                                labels={'value': 'Hours'
+                                        ,'variable':'Time Alloc'},
                                 color='variable',
                                 title=f'Band 6 Practitioner Hours by Week')
             
@@ -776,7 +777,8 @@ if button_run_pressed:
                                 x='Week Number',
                                 y='value',
                                 nbins=sim_duration_input,
-                                labels={'value': 'Hours'},
+                                labels={'value': 'Hours'
+                                        ,'variable':'Time Alloc'},
                                 color='variable',
                                 title=f'Band 4 Practitioner Hours by Week')
             
