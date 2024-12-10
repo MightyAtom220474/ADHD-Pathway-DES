@@ -586,7 +586,7 @@ if button_run_pressed:
                                 color_discrete_sequence=['blue'],
                                 title=f'Referral Screening Hours by Week')
             
-            fig.update_layout(title_x=0.2,font=dict(size=10),bargap=0.2)
+            fig.update_layout(title_x=0.8,font=dict(size=10),bargap=0.2)
             
             fig.update_traces(marker_line_color='black', marker_line_width=1)
             #fig.
@@ -611,7 +611,7 @@ if button_run_pressed:
                                     color_discrete_sequence=['blue'],
                                     title=f'Triage Clinical Hours by Week')
                 
-                fig.update_layout(title_x=0.2,font=dict(size=10),bargap=0.2)
+                fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
                 
                 fig.update_traces(marker_line_color='black', marker_line_width=1)
                 #fig.
@@ -634,7 +634,7 @@ if button_run_pressed:
                                     color_discrete_sequence=['blue'],
                                     title=f'Triage Admin Hours by Week')
                 
-                fig.update_layout(title_x=0.2,font=dict(size=10),bargap=0.2)
+                fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
                 
                 fig.update_traces(marker_line_color='black', marker_line_width=1)
                 #fig.
@@ -657,7 +657,7 @@ if button_run_pressed:
                                     color_discrete_sequence=['blue'],
                                     title=f'Triage Rejection Hours by Week')
                 
-                fig.update_layout(title_x=0.2,font=dict(size=10),bargap=0.2)
+                fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
                 
                 fig.update_traces(marker_line_color='black', marker_line_width=1)
                 #fig.
@@ -704,7 +704,7 @@ if button_run_pressed:
                     # get rid of 'variable' prefix resulting from df.melt
                     fig.for_each_annotation(lambda a: a.update(text=a.text.split
                                                             ("=")[1]))
-                    fig.update_layout(title_x=0.2,font=dict(size=10),bargap=0.2)
+                    fig.update_layout(title_x=0.5,font=dict(size=10),bargap=0.2)
                     fig.update_traces(marker_line_color='black', marker_line_width=1)
                     #fig.
 
@@ -737,7 +737,7 @@ if button_run_pressed:
                     # get rid of 'variable' prefix resulting from df.melt
                     fig.for_each_annotation(lambda a: a.update(text=a.text.split
                                                             ("=")[1]))
-                    fig.update_layout(title_x=0.2,font=dict(size=10),bargap=0.2)
+                    fig.update_layout(title_x=0.5,font=dict(size=10),bargap=0.2)
                     fig.update_traces(marker_line_color='black', marker_line_width=1)
                     #fig.
 
