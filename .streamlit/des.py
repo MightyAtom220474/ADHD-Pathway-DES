@@ -366,7 +366,7 @@ if button_run_pressed:
                     #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
                     #               font=dict(size=20), automargin=True, yref='paper')
                     #     ))
-                    fig.update_layout(title_x=0.25,font=dict(size=10))
+                    fig.update_layout(title_x=0.3,font=dict(size=10))
                     #fig.
 
                     st.plotly_chart(fig, use_container_width=True)
@@ -423,7 +423,7 @@ if button_run_pressed:
                     #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week, 
                     #       font=dict(size=20), automargin=True, yref='paper')
                     #     ))
-                    fig2.update_layout(title_x=0.25,font=dict(size=10))
+                    fig2.update_layout(title_x=0.3,font=dict(size=10))
                     #fig.
 
                     st.plotly_chart(fig2, use_container_width=True)
@@ -493,7 +493,7 @@ if button_run_pressed:
                     #     title=dict(text=f'ADHD {'variable'} Waiting Lists by Week,
                     #       font=dict(size=20), automargin=True, yref='paper')
                     #     ))
-                    fig3.update_layout(title_x=0.25,font=dict(size=10))
+                    fig3.update_layout(title_x=0.3,font=dict(size=10))
 
                     ##fig3.add_hline(y=y_var_targ, annotation_text="mean")
                     
