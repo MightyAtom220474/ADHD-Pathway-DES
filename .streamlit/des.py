@@ -232,14 +232,13 @@ if button_run_pressed:
         
         ########## Clinical & Admin Tab ##########
         
-        ##### get all data structure correctly #####
+        ##### get all data structured correctly #####
 
         ##### Top - 1 chart #####
 
         df_weekly_ref_screen = df_weekly_stats[['Run','Week Number',
                                                 'Referral Screen Hrs']]
-        
-               
+                  
         ##### Middle - 3 columns 1 row #####
 
         df_weekly_triage_clin = df_weekly_stats[['Run','Week Number',
@@ -290,9 +289,22 @@ if button_run_pressed:
                                         'Diag Accept Hrs','Diag Reject Hrs'],
                                         id_vars=['Run','Week Number'])
         
+        ##### Band 4 Practitioner
+
+        df_weekly_b4 = df_weekly_stats[['Run','Week Number',
+                                        'Obs Visit Hrs','Obs Reject Hrs',
+                                        'MDT Prep Hrs','MDT Meet Hrs']]
+
+        df_weekly_b4_unpivot = pd.melt(df_weekly_b4, value_vars=['Run','Week Number',
+                                        'Obs Visit Hrs','Obs Reject Hrs',
+                                        'MDT Prep Hrs','MDT Meet Hrs'],
+                                        id_vars=['Run','Week Number'])
+        
                        
         tab1, tab2, tab3 = st.tabs(["Waiting Lists", "Clinical & Admin","Job Plans"])
-
+        
+        ########## Waiting Lists Tab ##########
+        
         with tab1:    
 
             col1, col2, col3 = st.columns(3)
@@ -557,6 +569,9 @@ if button_run_pressed:
             #         mime='application/octet-stream')
             #     download_2()
 
+
+        ########## Clinical & Admin Tab ##########
+
         with tab2:
 
             st.subheader(section_title)
@@ -736,8 +751,8 @@ if button_run_pressed:
 
             st.subheader('Job Plans')
 
-            #df_ref_screen_avg = df_weekly_ref_screen.groupby(['Week Number'])['Referral Screen Hrs'].mean().reset_index()
-            
+            ##### Band 6 Practitioner #####
+
             fig = px.histogram(df_weekly_b6_unpivot, 
                                 x='Week Number',
                                 y='value',
@@ -745,6 +760,25 @@ if button_run_pressed:
                                 labels={'value': 'Hours'},
                                 color='variable',
                                 title=f'Band 6 Practitioner Hours by Week')
+            
+            fig.update_layout(title_x=0.5,font=dict(size=10),bargap=0.2)
+            
+            fig.update_traces(marker_line_color='black', marker_line_width=1)
+            #fig.
+
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.divider()
+
+            ##### Band 4 Practitioner #####
+            
+            fig = px.histogram(df_weekly_b4_unpivot, 
+                                x='Week Number',
+                                y='value',
+                                nbins=sim_duration_input,
+                                labels={'value': 'Hours'},
+                                color='variable',
+                                title=f'Band 4 Practitioner Hours by Week')
             
             fig.update_layout(title_x=0.5,font=dict(size=10),bargap=0.2)
             
