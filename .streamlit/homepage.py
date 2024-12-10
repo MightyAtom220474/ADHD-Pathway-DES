@@ -1,9 +1,13 @@
 import streamlit as st
+#from app_style import global_page_style
 
-#st.logo("lscft_logo.jpg")
+
+st.logo("https://lancsvp.org.uk/wp-content/uploads/2021/08/nhs-logo-300x189.png")
 
 # with open("style.css") as css:
 #     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
+
+#global_page_style('static/css/style.css')
 
 st.title("ADHD Pathway Simulation App")
 

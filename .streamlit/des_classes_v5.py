@@ -26,42 +26,54 @@ class g:
     mean_referrals_pw = 60
     referral_rejection_rate = 0.05 # % of referrals rejected, assume 5%
     base_waiting_list = 2741 # current number of patients on waiting list
+    referral_screen_time = 15
 
     # Triage
     target_triage_wait = 4 # triage within 4 weeks
     triage_waiting_list = 0 # number waiting for triage
     triage_rejection_rate = 0.05 # % rejected at triage, assume 5%
     triage_resource = 48 # number of triage slots p/w @ 10 mins
-    #triage_admin_resource = 48 # number of triage slots p/w @ 30 mins
-    total_triage_clinical_time = 0 # clinical time used on triages p/w
-    total_triage_admin_time = 0 # # admin time used on triages p/w
+    triage_clin_time = 60 # number of mins for clinician to do triage
+    triage_admin_time = 15 # number of mins of admin to do triage
+    triage_discharge_time = 45 # time taken if discharged at triage
 
     # School/Home Assesment Pack
     target_pack_wait = 3 # pack to be returned within 3 weeks
     pack_rejection_rate = 0.03 # % rejected based on pack assume 3%
-
+    pack_admin_time = 30 # B4 admin sending out pack
+    pack_reject_time = 45 # time taken if patient rejected at this stage
+    
     # QB and Observations
     target_obs_wait = 4 # QB and School obs to be completed within 4 weeks
     obs_rejection_rate = 0.02 # % rejected due to obs not taking place assume 1%
+    qb_test_time = 90 # tike taken by B4 to do QB and write up
+    school_obs_time = 180 # time taken for B4 to do obs incl travel
+    obs_reject_time = 45 # time taken if patient rejected at this stage
 
     # MDT
     target_mdt_wait = 1 # how long did it take to be reviewed at MDT, assume 1 week
     mdt_rejection_rate = 0.05 # % rejected at MDT, assume 5%
-    mdt_resource = 25 # no. of MDT slots p/w, assume 1 mdt per day & review 5 cases
+    mdt_resource = 6 # no. of MDT slots p/w, assume 1 mdt/wk @1hr & review 6 cases
+    mdt_meet_time = 60 # number of mins to do MDT
+    mdt_prep_time = 90 # time take for B4 to prep case for MDT
 
     # Assessment
     target_asst_wait = 4 # assess within 4 weeks
     asst_resource = 62 # number of assessment slots p/w @ 60 mins
-    #asst_admin_resource = 62 # number of assessment slots p/w @ 90 mins
+    asst_clin_time = 90 # number of mins for clinician to do asst
+    asst_max_clin_time = 90 # maximum time it takes clin to do asst
+    asst_admin_time = 90 # number of mins of admin following asst
+    asst_max_admin_time = 90 # maximum time it takes admin to do asst
     asst_rejection_rate = 0.01 # % found not to have ADHD, assume 1%
 
     # Diagnosis
-    accepted_into_service = 0 # number accepted into service
-    rejected_from_service = 0 # number rejected from service
+    diag_time_disch = 90 # time taken after asst if discharged
+    diag_time_accept = 150 # time taken after asst if accepted
 
     # Simulation
     sim_duration = 52
     number_of_runs = 10
+    std_dev = 3 # used for randomising activity times
 
     # Result storage
     all_results = []
@@ -85,32 +97,44 @@ class Patient:
 
         # Referral
         self.referral_rejected = 0 # were they rejected at referral
+        self.referral_time_screen = 0 # B6 time taken to screen referral
 
         #Triage
         self.q_time_triage = 0 # how long they waited for triage
+        self.triage_time_clin = 0 # how long the triage took clinician in minutes
+        self.triage_time_admin = 0 # how long the triage took admin in minutes
         self.place_on_triage_wl = 0 # position they are on Triage waiting list
         self.triage_rejected = 0 # were they rejected following triage
+        self.triage_time_disch = 0 # time take if rejected at this stage
 
         # School/Home Assesment Pack
         self.pack_rejected = 0 # rejected as school pack not returned
         self.pack_time = 0 # actual time taken doing school pack
+        self.pack_time_admin = 0 # admin sending out pack in mins
+        self.pack_time_reject = 0 # time taken notifying patient if rejected
 
         # Observations
         self.obs_rejected = 0 # rejected as observations not completed
         self.obs_time = 0 # actual time taken doing observations
+        self.obs_time_clin = 0 # clicical time doing obs incl travel
 
         # MDT
+        self.mdt_time_prep = 0 # time taken by B4 prepping for MDT
         self.q_time_mdt = 0 # how long they waited for MDT
         self.place_on_mdt_wl = 0 # position they are on MDT waiting list
         self.mdt_rejected = 0 # were they rejected following MDT
 
         # Assessment
         self.q_time_asst = 0 # how long they waited for assessment
+        self.asst_time_clin = 0 # how long the asst took clinician in minutes
+        self.asst_time_admin = 0 # how long the asst took to write up in minutes
         self.place_on_asst_wl = 0 # position they are on assessment waiting list
         self.asst_rejected = 0 # were they rejected following assessment
 
         # Diagnosis
         self.diagnosis_status = 0 # were they accepted or rejected
+        self.diag_time_reject = 0 # time taken notifying if rejected
+        self.diag_time_accept = 0 # time taken notifying if accepted
 
 # Class representing our model of the ADHD clinical pathway
 class Model:
@@ -134,21 +158,32 @@ class Model:
         # Referral
         self.results_df['Week Number'] = [0]
         self.results_df['Run Number'] = [0]
-        self.results_df['Referral Rejected'] = [0]
+        self.results_df['Referral Time Screen'] = [0]
+        self.results_df['Referral Rejected'] = [0.0]
         # Triage
         self.results_df['Q Time Triage'] = [0.0]
         self.results_df['Time to Triage'] = [0.0]
+        self.results_df['Triage Mins Clin'] = [0.0]
+        self.results_df['Triage Mins Admin'] = [0.0]
         self.results_df['Total Triage Time'] = [0.0]
         self.results_df['Triage WL Posn'] = [0]
         self.results_df['Triage Rejected'] = [0]
+        self.results_df['Triage Time Reject'] = [0.0]
         # School Pack
+        self.results_df['Time Pack Send'] = [0.0]
         self.results_df['Return Time Pack'] = [0.0]
         self.results_df['Pack Rejected'] = [0]
+        self.results_df['Time Pack Reject'] = [0.0]
         #School Obs
+        self.results_df['Time Obs Visit'] = [0.0]
         self.results_df['Return Time Obs'] = [0.0]
         self.results_df['Obs Rejected'] = [0]
+        self.results_df['Time Obs Reject'] = [0.0]
         # Triage
         self.results_df['Q Time MDT'] = [0.0]
+        self.results_df['Time to MDT'] = [0.0]
+        self.results_df['Time Prep MDT'] = [0.0]
+        self.results_df['Time Meet MDT'] = [0.0]
         self.results_df['Time to MDT'] = [0.0]
         self.results_df['Total MDT Time'] = [0.0]
         self.results_df['MDT WL Posn'] = [0]
@@ -156,11 +191,14 @@ class Model:
         # Triage
         self.results_df['Q Time Asst'] = [0.0]
         self.results_df['Time to Asst'] = [0.0]
+        self.results_df['Asst Mins Clin'] = [0.0]
+        self.results_df['Asst Mins Admin'] = [0.0]
         self.results_df['Total Asst Time'] = [0.0]
         self.results_df['Asst WL Posn'] = [0]
         self.results_df['Asst Rejected'] = [0]
         # Diagnosis
-        self.results_df['Diagnosis Rejected'] = [0]
+        self.results_df['Diag Rejected Time'] = [0.0]
+        self.results_df['Diag Accepted Time'] = [0.0]
         # Indexing
         self.results_df.set_index("Patient ID", inplace=True)
 
@@ -169,6 +207,13 @@ class Model:
         self.mean_q_time_triage = 0
         self.mean_q_time_mdt = 0
         self.mean_q_time_asst = 0
+
+    # random number generator for activity times
+    def random_normal(self, mean, std_dev):
+        while True:
+            activity_time = random.gauss(mean, std_dev)
+            if activity_time > 0:
+                return activity_time
 
     def week_runner(self,number_of_weeks):
 
@@ -208,19 +253,26 @@ class Model:
     ##################################
                     """
                     )
-
+            
             # Start up the referral generator function
             self.env.process(self.generator_patient_referrals())
 
-            # capture waiting list position at end of each week
-            # SR comment: I've moved run capturing from here and moved it to the end as was
-            # seeing some odd behaviour in the final result
+            self.referral_tot_screen = self.results_df['Referral Time Screen'].sum()
             self.max_triage_wl = self.results_df["Triage WL Posn"].max()
             self.triage_rej = self.results_df["Triage Rejected"].sum()
             self.triage_avg_wait = self.results_df["Q Time Triage"].mean()
+            self.triage_tot_clin = self.results_df['Triage Mins Clin'].sum()
+            self.triage_tot_admin = self.results_df['Triage Mins Admin'].sum()
+            self.triage_tot_reject = self.results_df['Triage Time Reject'].sum()
             #self.triage_targ_wait = g.target_triage_wait
+            self.pack_tot_send = self.results_df["Time Pack Send"].sum()
             self.pack_rej = self.results_df["Pack Rejected"].sum()
+            self.pack_tot_rej = self.results_df["Time Pack Reject"].sum()
+            self.obs_tot_visit = self.results_df["Time Obs Visit"].sum()
             self.obs_rej = self.results_df["Obs Rejected"].sum()
+            self.obs_tot_rej = self.results_df["Time Obs Reject"].sum()
+            self.mdt_tot_prep = self.results_df["Time Prep MDT"].sum()
+            self.mdt_tot_meet = self.results_df["Time Meet MDT"].sum()
             self.max_mdt_wl = self.results_df["MDT WL Posn"].max()
             self.mdt_rej = self.results_df["MDT Rejected"].sum()
             self.mdt_avg_wait = self.results_df["Q Time MDT"].mean()
@@ -228,32 +280,47 @@ class Model:
             self.max_asst_wl = self.results_df["Asst WL Posn"].max()
             self.asst_rej = self.results_df["Asst Rejected"].sum()
             self.asst_avg_wait = self.results_df["Q Time Asst"].mean()
+            self.asst_tot_clin = self.results_df['Asst Mins Clin'].sum()
+            self.asst_tot_admin = self.results_df['Asst Mins Admin'].sum()
+            self.diag_tot_rej = self.results_df['Diag Rejected Time'].sum()
+            self.diag_tot_acc = self.results_df['Diag Accepted Time'].sum()
             #self.asst_targ_wait = g.target_asst_wait
 
             # weekly waiting list positions
             self.df_weekly_stats.append(
                 {
-                    'Week Number':self.week_number,
+                 'Week Number':self.week_number,
+                 'Referral Screen Mins':self.referral_tot_screen,   
                  'Triage WL':self.max_triage_wl,
                  'Triage Rejects':self.triage_rej,
                  'Triage Wait':self.triage_avg_wait,
-                 #'Triage Target Wait':self.triage_targ_wait,
+                 'Triage Clin Mins':self.triage_tot_clin,
+                 'Triage Admin Mins':self.triage_tot_admin,
+                 'Triage Reject Mins':self.triage_tot_reject,
+                 'Pack Send Mins':self.pack_tot_send,
                  'Pack Rejects':self.pack_rej,
+                 'Pack Reject Mins':self.pack_tot_rej,
+                 'Obs Visit Mins':self.obs_tot_visit,
                  'Obs Rejects':self.obs_rej,
+                 'Obs Reject Mins':self.obs_tot_rej,
+                 'MDT Prep Mins':self.mdt_tot_prep,
+                 'MDT Meet Mins':self.mdt_tot_meet,
                  'MDT WL':self.max_mdt_wl,
                  'MDT Rejects':self.mdt_rej,
                  'MDT Wait':self.mdt_avg_wait,
-                 #'MDT Target Wait':self.mdt_targ_wait,
                  'Asst WL':self.max_asst_wl,
                  'Asst Rejects':self.asst_rej,
                  'Asst Wait':self.asst_avg_wait,
-                 #'Asst Target Wait':self.asst_targ_wait
-                 }
-                 )
-
-            # SR Comment - can remove this as have done in a slightly different way
-            # You will want to remove this and
-            g.weekly_wl_posn = pd.DataFrame.from_dict(self.df_weekly_stats)
+                 'Asst Clin Mins':self.asst_tot_clin,
+                 'Asst Admin Mins':self.asst_tot_admin,
+                 'Diag Reject Mins':self.diag_tot_rej,
+                 'Diag Accept Mins':self.diag_tot_acc,
+                }
+                )
+            
+            # # SR Comment - can remove this as have done in a slightly different way
+            # # You will want to remove this and
+            # g.weekly_wl_posn = pd.DataFrame.from_dict(self.df_weekly_stats)
             
             # replenish resources ready for next week
             # SR comment: it seems here if you try to put in an amount that would cause it to exceed
@@ -315,7 +382,7 @@ class Model:
         # as in trial you'll create a new model that starts with the week counter
         # set at 0
         # self.week_number = 0
-
+       
     # generator function that represents the DES generator for referrals
     def generator_patient_referrals(self):
 
@@ -395,6 +462,8 @@ class Model:
             p = Patient(self.patient_counter)
             p.week_added = week_number
 
+            self.results_df.at[p.id, 'Referral Time Screen'] = self.random_normal(g.referral_screen_time,g.std_dev)
+
             # print(f'Week {week_number}: Patient number {p.id} created')
 
             # check whether the referral was rejected or not
@@ -468,14 +537,19 @@ class Model:
                     # Record how long the patient waited to be Triaged
                     self.results_df.at[p.id, 'Q Time Triage'] = \
                                                             (self.q_time_triage)
-                    # Record how long the patient took to be Triage
+                    # Record how long the patient took to be Triaged
                     self.results_df.at[p.id, 'Time to Triage'] = \
-                                                            sampled_triage_time
+                                                    sampled_triage_time
+                    self.results_df.at[p.id,'Triage Mins Clin'] = \
+                                                    self.random_normal(g.triage_clin_time,g.std_dev)
+                    self.results_df.at[p.id,'Triage Mins Admin'] = \
+                                                    self.random_normal(g.triage_admin_time,g.std_dev)
+
                     # Record total time it took to triage patient
                     self.results_df.at[p.id, 'Total Triage Time'] = \
-                                                                (sampled_triage_time
-                                                                +(end_q_triage -
-                                                                start_q_triage))
+                                                            (sampled_triage_time
+                                                            +(end_q_triage -
+                                                            start_q_triage))
 
                     #print(f'Patient number {self.patient_counter} triaged')
 
@@ -483,6 +557,8 @@ class Model:
                     if self.reject_triage <= g.triage_rejection_rate:
 
                         self.results_df.at[p.id, 'Triage Rejected'] = 1
+                        
+                        self.results_df['Triage Time Reject'] = self.random_normal(g.triage_discharge_time,g.std_dev)
 
                         #reject all the other parts of the pathway if triage rejected
                         # SR Comment - see above ref setting of these patient attributes
@@ -500,6 +576,8 @@ class Model:
 
                         ##### Now send out the Pack #####
 
+                        self.results_df['Time Pack Send'] = self.random_normal(g.pack_admin_time,g.std_dev)
+
                         # determine whether the pack was returned on time or not
                         if self.reject_pack < g.pack_rejection_rate:
                         #print(f'Patient {p} pack sent out')
@@ -508,6 +586,7 @@ class Model:
                                                                     self.sampled_pack_time
                             # Mark that the pack was returned on time
                             self.results_df.at[p.id, 'Pack Rejected'] = 1
+                            self.results_df['Time Pack Reject'] = self.random_normal(g.pack_reject_time,g.std_dev)
                             #reject all the other parts of the pathway if pack rejected
                             self.reject_obs = g.obs_rejection_rate
                             self.reject_mdt = g.mdt_rejection_rate
@@ -525,6 +604,8 @@ class Model:
 
                             ##### Now do the Observations #####
 
+                            self.results_df['Time Obs Visit'] = self.random_normal(g.school_obs_time,g.std_dev)
+
                             # determine whether the obs were returned on time or not
                             if self.reject_obs < g.obs_rejection_rate:
                             #print(f'Patient {p} obs started')
@@ -535,6 +616,8 @@ class Model:
                                 # Record how long the patient took for Obs
                                 self.results_df.at[p.id, 'Return Time Obs'] = \
                                                                             self.sampled_obs_time
+                                self.results_df['Time Obs Reject'] = self.random_normal(g.obs_reject_time,g.std_dev)
+
                                 #reject all the other parts of the pathway if obs rejected
                                 self.reject_mdt = g.mdt_rejection_rate
                                 self.reject_asst = g.asst_rejection_rate
@@ -556,6 +639,8 @@ class Model:
                                 #print(f'Patient {p} MDT started')
                                 start_q_mdt = self.env.now
 
+                                self.results_df['Time Prep MDT'] = self.random_normal(g.mdt_prep_time,g.std_dev)
+                                self.results_df['Time Meet MDT'] = self.random_normal(g.mdt_meet_time,g.std_dev)
                                 # add referral to MDT waiting list as has passed obs
                                 g.number_on_mdt_wl += 1
 
@@ -638,7 +723,11 @@ class Model:
                                                                                         (self.q_time_asst)
                                             # Record how long the patient took to be Triage
                                             self.results_df.at[p.id, 'Time to Asst'] = \
-                                                                                        sampled_asst_time
+                                                    sampled_asst_time
+                                            self.results_df.at[p.id,'Triage Mins Clin'] = \
+                                                    self.random_normal(g.asst_clin_time,g.std_dev)
+                                            self.results_df.at[p.id,'Triage Mins Admin'] = \
+                                                    self.random_normal(g.asst_admin_time,g.std_dev)
                                             # Record total time it took to triage patient
                                             self.results_df.at[p.id, 'Total Asst Time'] = \
                                                                                         (sampled_asst_time
@@ -649,11 +738,13 @@ class Model:
                                             if self.reject_asst <= g.asst_rejection_rate:
 
                                                 self.results_df.at[p.id, 'Asst Rejected'] = 1
+                                                self.results_df['Diag Rejected Time'] = self.random_normal(g.diag_time_disch,g.std_dev)
                                                 # release the resource once the Assessment is completed
                                                 yield self.env.timeout(sampled_asst_time)
 
                                             else:
                                                 self.results_df.at[p.id, 'Asst Rejected'] = 0
+                                                self.results_df['Diag Accepted Time'] = self.random_normal(g.diag_time_accept,g.std_dev)
                                                 # release the resource once the Assessment is completed
                                                 yield self.env.timeout(sampled_asst_time)
 
@@ -767,7 +858,7 @@ class Trial:
             my_model.df_weekly_stats['Run'] = run
 
             self.weekly_wl_dfs.append(my_model.df_weekly_stats)
-
+                   
         # Once the trial (i.e. all runs) has completed, print the final results
         return self.df_trial_results, pd.concat(self.weekly_wl_dfs)
     
