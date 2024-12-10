@@ -393,7 +393,7 @@ if button_run_pressed:
                                 go.Scatter(x=weekly_avg_wt["Week Number"],
                                         y=weekly_avg_wt["value"],
                                         name='Average',line=dict(width=3,
-                                        color='red')))
+                                        color='blue')))
         
                     fig3.add_trace(
                                 go.Scatter(x=weekly_avg_wt["Week Number"],
