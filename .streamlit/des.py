@@ -734,7 +734,7 @@ if button_run_pressed:
 
         with tab3:
 
-            st.subheader(section_title)
+            st.subheader('Job Plans')
 
             #df_ref_screen_avg = df_weekly_ref_screen.groupby(['Week Number'])['Referral Screen Hrs'].mean().reset_index()
             
