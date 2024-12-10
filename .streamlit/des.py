@@ -26,62 +26,75 @@ st.logo("https://lancsvp.org.uk/wp-content/uploads/2021/08/nhs-logo-300x189.png"
 st.title("ADHD Pathway Simulation")
 
 with st.sidebar:
+
     st.subheader("Model Inputs")
 
-    # Referral Inputs
-    st.markdown("#### Referrals")
-    referral_input = st.slider("Number of Referrals Per Week", 1, 100, 50)
-    referral_reject_input = st.slider("Referral Rejection Rate (%)",
-                                      0.0, 10.0, 5.0)
+    with st.expander("Referral Inputs"):
+
+        # Referral Inputs
+        st.markdown("#### Referrals")
+        referral_input = st.slider("Number of Referrals Per Week", 1, 100, 50)
+        referral_reject_input = st.slider("Referral Rejection Rate (%)",
+                                        0.0, 10.0, 5.0)
+        
     
-    # Triage Inputs
-    st.divider()
-    st.markdown("#### Triage")
-    triage_rejection_input = st.slider("Triage Rejection Rate (%)",
-                                       0.0, 10.0, 5.0)
-    triage_target_input = st.slider("Number of Weeks to Triage", 1, 10, 4)
-    triage_resource_input =  st.slider("Number of Triage Slots p/w", 20, 60, 48)
-    triage_clin_time_input =  st.slider("Avg Clinical Time per Triage (mins)", 20, 60, 48)
-    triage_admin_time_input =  st.slider("Avg Admin Time per Triage (mins)", 20, 60, 48)
+    with st.expander("Triage Inputs"):
+        
+        # Triage Inputs
+        st.divider()
+        st.markdown("#### Triage")
+        triage_rejection_input = st.slider("Triage Rejection Rate (%)",
+                                        0.0, 10.0, 5.0)
+        triage_target_input = st.slider("Number of Weeks to Triage", 1, 10, 4)
+        triage_resource_input =  st.slider("Number of Triage Slots p/w", 20, 60, 48)
+        triage_clin_time_input =  st.slider("Avg Clinical Time per Triage (mins)", 20, 60, 48)
+        triage_admin_time_input =  st.slider("Avg Admin Time per Triage (mins)", 20, 60, 48)
 
+    with st.expander("Pack & Observations Inputs"):
+
+        # School/Home Assessment Packs
+        st.divider()
+        st.markdown("#### School/Home Assessment Packs")
+        target_pack_input = st.slider("Number of Weeks to Return Information Pack"
+                                                                        ,2, 6, 3)
+        pack_rejection_input = st.slider("Assessment Pack Rejection Rate (%)"
+                                                                , 0.0, 10.0, 3.0)
+        # Observations
+        st.divider()
+        st.markdown("#### QB and Observations")
+        target_obs_input = st.slider("Number of Weeks to Return Observations"
+                                                                        ,2, 6, 4)
+        obs_rejection_input = st.slider("Observations Rejection Rate (%)"
+                                                                , 0.0, 10.0, 1.0)
+    with st.expander("MDT Inputs"):
+   
+        # MDT Inputs
+        st.divider()
+        st.markdown("#### MDT")
+        mdt_rejection_input = st.slider("MDT Rejection Rate (%)", 0.0, 10.0, 5.0)
+        mdt_target_input = st.slider("Number of Weeks to MDT", 0, 5, 1)
+        mdt_resource_input =  st.slider("Number of MDT Slots p/w", 20, 60, 25)
+
+    with st.expander("Assessment Inputs"):
     
-    # School/Home Assessment Packs
-    st.divider()
-    st.markdown("#### School/Home Assessment Packs")
-    target_pack_input = st.slider("Number of Weeks to Return Information Pack"
-                                                                    ,2, 6, 3)
-    pack_rejection_input = st.slider("Assessment Pack Rejection Rate (%)"
-                                                            , 0.0, 10.0, 3.0)
-    # Observations
-    st.divider()
-    st.markdown("#### QB and Observations")
-    target_obs_input = st.slider("Number of Weeks to Return Observations"
-                                                                    ,2, 6, 4)
-    obs_rejection_input = st.slider("Observations Rejection Rate (%)"
-                                                            , 0.0, 10.0, 1.0)
-    # MDT Inputs
-    st.divider()
-    st.markdown("#### MDT")
-    mdt_rejection_input = st.slider("MDT Rejection Rate (%)", 0.0, 10.0, 5.0)
-    mdt_target_input = st.slider("Number of Weeks to MDT", 0, 5, 1)
-    mdt_resource_input =  st.slider("Number of MDT Slots p/w", 20, 60, 25)
+        # Assessment Inputs
+        st.divider()
+        st.markdown("#### Assessment")
+        asst_rejection_input = st.slider("Assessment Rejection Rate (%)",
+                                        0.0, 10.0, 1.0)
+        asst_target_input = st.slider("Number of Weeks to Assess", 0, 5, 4)
+        asst_resource_input =  st.slider("Number of Assessment Slots p/w",
+                                        40, 80, 62)
+        asst_clin_time_input =  st.slider("Avg Clinical Time per Asst (mins)", 20, 60, 48)
+        asst_admin_time_input =  st.slider("Avg Admin Time per Asst (mins)", 20, 60, 48)
 
-    # Assessment Inputs
-    st.divider()
-    st.markdown("#### Assessment")
-    asst_rejection_input = st.slider("Assessment Rejection Rate (%)",
-                                     0.0, 10.0, 1.0)
-    asst_target_input = st.slider("Number of Weeks to Assess", 0, 5, 4)
-    asst_resource_input =  st.slider("Number of Assessment Slots p/w",
-                                     40, 80, 62)
-    asst_clin_time_input =  st.slider("Avg Clinical Time per Asst (mins)", 20, 60, 48)
-    asst_admin_time_input =  st.slider("Avg Admin Time per Asst (mins)", 20, 60, 48)
-
-    st.divider()
-    st.markdown("#### Simulation Parameters")
-    sim_duration_input =  st.slider("Simulation Duration (weeks)", 1, 260, 52)
-    st.write(f"The service is running for {sim_duration_input} weeks")
-    number_of_runs_input = st.slider("Number of Simulation Runs", 1, 100, 10)
+    with st.expander("Simulation Parameters"):
+    
+        st.divider()
+        st.markdown("#### Simulation Parameters")
+        sim_duration_input =  st.slider("Simulation Duration (weeks)", 1, 260, 52)
+        st.write(f"The service is running for {sim_duration_input} weeks")
+        number_of_runs_input = st.slider("Number of Simulation Runs", 1, 100, 10)
 
 g.mean_referrals_pw = referral_input
 g.base_waiting_list = 2741
@@ -151,7 +164,7 @@ if button_run_pressed:
 
         ########## Waiting List Tab ##########
 
-        ##### get all data structure correctly #####
+        ##### get all data structured correctly #####
 
         with st.expander("See explanation"):
             st.write('This ADHD Simulation is designed to replicate the flow '
@@ -257,8 +270,28 @@ if button_run_pressed:
                                         'Obs Reject Hrs','MDT Meet Hrs',
                                         'Asst Admin Hrs','Diag Accept Hrs'],
                                         id_vars=['Run','Week Number'])
+        
+        ########## Job Plans Tab ##########
+
+        ##### Band 6 Practitioner
+
+        df_weekly_b6 = df_weekly_stats[['Run','Week Number',
+                                        'Referral Screen Hrs','Triage Clin Hrs',
+                                        'Triage Admin Hrs','Triage Reject Hrs',
+                                        'Pack Reject Hrs','Obs Reject Hrs',
+                                        'Asst Clin Hrs','Asst Admin Hrs',
+                                        'Diag Accept Hrs','Diag Reject Hrs']]
+
+        df_weekly_b6_unpivot = pd.melt(df_weekly_b6, value_vars=['Run','Week Number',
+                                        'Referral Screen Hrs','Triage Clin Hrs',
+                                        'Triage Admin Hrs','Triage Reject Hrs',
+                                        'Pack Reject Hrs','Obs Reject Hrs',
+                                        'Asst Clin Hrs','Asst Admin Hrs',
+                                        'Diag Accept Hrs','Diag Reject Hrs'],
+                                        id_vars=['Run','Week Number'])
+        
                        
-        tab1, tab2 = st.tabs(["Waiting Lists", "Clinical & Admin"])
+        tab1, tab2, tab3 = st.tabs(["Waiting Lists", "Clinical & Admin","Job Plans"])
 
         with tab1:    
 
@@ -696,3 +729,28 @@ if button_run_pressed:
                     st.plotly_chart(fig, use_container_width=True)
 
                     st.divider()
+
+        ########## Job Plan Tab ##########
+
+        with tab3:
+
+            st.subheader(section_title)
+
+            #df_ref_screen_avg = df_weekly_ref_screen.groupby(['Week Number'])['Referral Screen Hrs'].mean().reset_index()
+            
+            fig = px.histogram(df_weekly_b6_unpivot, 
+                                x='Week Number',
+                                y='value',
+                                nbins=sim_duration_input,
+                                labels={'value': 'Hours'},
+                                color='variable',
+                                title=f'Band 6 Practitioner Hours by Week')
+            
+            fig.update_layout(title_x=0.5,font=dict(size=10),bargap=0.2)
+            
+            fig.update_traces(marker_line_color='black', marker_line_width=1)
+            #fig.
+
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.divider()
