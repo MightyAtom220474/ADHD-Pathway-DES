@@ -761,7 +761,7 @@ if button_run_pressed:
                                 color='variable',
                                 title=f'Band 6 Practitioner Hours by Week')
             
-            fig.update_layout(title_x=0.5,font=dict(size=10),bargap=0.2)
+            fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
             
             fig.update_traces(marker_line_color='black', marker_line_width=1)
             #fig.
@@ -780,7 +780,7 @@ if button_run_pressed:
                                 color='variable',
                                 title=f'Band 4 Practitioner Hours by Week')
             
-            fig.update_layout(title_x=0.5,font=dict(size=10),bargap=0.2)
+            fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
             
             fig.update_traces(marker_line_color='black', marker_line_width=1)
             #fig.
