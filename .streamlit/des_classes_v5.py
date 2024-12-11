@@ -56,14 +56,13 @@ class g:
     mdt_resource = 6 # no. of MDT slots p/w, assume 1 mdt/wk @1hr & review 6 cases
     mdt_meet_time = 60 # number of mins to do MDT
     mdt_prep_time = 90 # time take for B4 to prep case for MDT
+    mdt_reject_time = 45 # time taken if patient rejected at this stage
 
     # Assessment
     target_asst_wait = 4 # assess within 4 weeks
     asst_resource = 62 # number of assessment slots p/w @ 60 mins
     asst_clin_time = 90 # number of mins for clinician to do asst
-    asst_max_clin_time = 90 # maximum time it takes clin to do asst
     asst_admin_time = 90 # number of mins of admin following asst
-    asst_max_admin_time = 90 # maximum time it takes admin to do asst
     asst_rejection_rate = 0.01 # % found not to have ADHD, assume 1%
 
     # Diagnosis
@@ -78,9 +77,9 @@ class g:
     # Result storage
     all_results = []
     weekly_wl_posn = pd.DataFrame() # container to hold w/l position at end of week
-    number_on_triage_wl = 0
-    number_on_mdt_wl = 0
-    number_on_asst_wl = 0
+    number_on_triage_wl = 0 # used to keep track of triage WL position
+    number_on_mdt_wl = 0 # used to keep track of MDT WL position
+    number_on_asst_wl = 0 # used to keep track of asst WL position
 
 # Class representing patients coming in to the pathway
 
@@ -188,6 +187,7 @@ class Model:
         self.results_df['Total MDT Time'] = [0.0]
         self.results_df['MDT WL Posn'] = [0]
         self.results_df['MDT Rejected'] = [0]
+        self.results_df['MDT Time Reject'] = [0.0]
         # Triage
         self.results_df['Q Time Asst'] = [0.0]
         self.results_df['Time to Asst'] = [0.0]
@@ -274,6 +274,7 @@ class Model:
             self.mdt_tot_prep = self.results_df["Time Prep MDT"].sum()
             self.mdt_tot_meet = self.results_df["Time Meet MDT"].sum()
             self.max_mdt_wl = self.results_df["MDT WL Posn"].max()
+            self.mdt_tot_rej = self.results_df["MDT Time Reject"].sum()
             self.mdt_rej = self.results_df["MDT Rejected"].sum()
             self.mdt_avg_wait = self.results_df["Q Time MDT"].mean()
             #self.mdt_targ_wait = g.target_mdt_wait
@@ -307,6 +308,7 @@ class Model:
                  'MDT Meet Mins':self.mdt_tot_meet,
                  'MDT WL':self.max_mdt_wl,
                  'MDT Rejects':self.mdt_rej,
+                 'MDT Reject Mins':self.mdt_tot_rej,
                  'MDT Wait':self.mdt_avg_wait,
                  'Asst WL':self.max_asst_wl,
                  'Asst Rejects':self.asst_rej,
@@ -676,6 +678,8 @@ class Model:
                                                                                 start_q_mdt))
                                     if self.reject_mdt <= g.mdt_rejection_rate:
                                         self.results_df.at[p.id, 'MDT Rejected'] = 1
+
+                                        self.results_df['MDT Time Reject'] = self.random_normal(g.mdt_reject_time,g.std_dev)
                                         #reject all the other parts of the pathway if mdt rejected
                                         self.reject_asst = g.asst_rejection_rate
 
@@ -724,9 +728,9 @@ class Model:
                                             # Record how long the patient took to be Triage
                                             self.results_df.at[p.id, 'Time to Asst'] = \
                                                     sampled_asst_time
-                                            self.results_df.at[p.id,'Triage Mins Clin'] = \
+                                            self.results_df.at[p.id,'Asst Mins Clin'] = \
                                                     self.random_normal(g.asst_clin_time,g.std_dev)
-                                            self.results_df.at[p.id,'Triage Mins Admin'] = \
+                                            self.results_df.at[p.id,'Asst Mins Admin'] = \
                                                     self.random_normal(g.asst_admin_time,g.std_dev)
                                             # Record total time it took to triage patient
                                             self.results_df.at[p.id, 'Total Asst Time'] = \

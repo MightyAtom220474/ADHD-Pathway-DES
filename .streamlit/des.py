@@ -151,6 +151,7 @@ if button_run_pressed:
         df_weekly_stats['Obs Reject Hrs'] = (df_weekly_stats['Obs Reject Mins']-df_weekly_stats['Obs Reject Mins'].shift(1))/60
         df_weekly_stats['MDT Prep Hrs'] = (df_weekly_stats['MDT Prep Mins']-df_weekly_stats['MDT Prep Mins'].shift(1))/60
         df_weekly_stats['MDT Meet Hrs'] = (df_weekly_stats['MDT Meet Mins']-df_weekly_stats['MDT Meet Mins'].shift(1))/60
+        df_weekly_stats['MDT Reject Hrs'] = (df_weekly_stats['MDT Reject Mins']-df_weekly_stats['MDT Reject Mins'].shift(1))/60
         df_weekly_stats['Asst Clin Hrs'] = (df_weekly_stats['Asst Clin Mins']-df_weekly_stats['Asst Clin Mins'].shift(1))/60
         df_weekly_stats['Asst Admin Hrs'] = (df_weekly_stats['Asst Admin Mins']-df_weekly_stats['Asst Admin Mins'].shift(1))/60
         df_weekly_stats['Diag Reject Hrs'] = (df_weekly_stats['Diag Reject Mins']-df_weekly_stats['Diag Reject Mins'].shift(1))/60
@@ -239,7 +240,7 @@ if button_run_pressed:
         df_weekly_ref_screen = df_weekly_stats[['Run','Week Number',
                                                 'Referral Screen Hrs']]
                   
-        ##### Middle - 3 columns 1 row #####
+        ##### Upper Middle - 3 columns 1 row #####
 
         df_weekly_triage_clin = df_weekly_stats[['Run','Week Number',
                                                 'Triage Clin Hrs']]
@@ -249,26 +250,48 @@ if button_run_pressed:
         
         df_weekly_triage_rej = df_weekly_stats[['Run','Week Number',
                                                 'Triage Reject Hrs']]
+        ##### Middle - 2 columns 2 rows #####
+
+        df_weekly_col4 = df_weekly_stats[['Run','Week Number','Pack Send Hrs',
+                                        'Obs Visit Hrs']]
         
-        ##### Bottom - 2 columns 5 rows #####
+        df_weekly_col4_unpivot = pd.melt(df_weekly_col4, value_vars=[
+                                        'Pack Send Hrs',
+                                        'Obs Visit Hrs'],
+                                        id_vars=['Run','Week Number'])
         
-        df_weekly_col1 = df_weekly_stats[['Run','Week Number','Pack Send Hrs',
-                                        'Obs Visit Hrs','MDT Prep Hrs',
+        df_weekly_col5 = df_weekly_stats[['Run','Week Number','Pack Reject Hrs',
+                                        'Obs Reject Hrs']]
+        
+        df_weekly_col5_unpivot = pd.melt(df_weekly_col5, value_vars=[
+                                        'Pack Reject Hrs',
+                                        'Obs Reject Hrs'],
+                                        id_vars=['Run','Week Number'])
+        
+        ##### Lower Middle - 3 columns 1 row #####
+
+        df_weekly_mdt_prep = df_weekly_stats[['Run','Week Number',
+                                                'MDT Prep Hrs']]
+        
+        df_weekly_mdt_meet = df_weekly_stats[['Run','Week Number',
+                                                'MDT Meet Hrs']]
+        
+        df_weekly_mdt_rej = df_weekly_stats[['Run','Week Number',
+                                                'MDT Reject Hrs']]
+
+        ##### Bottom - 2 columns 2 rows #####
+        
+        df_weekly_col9 = df_weekly_stats[['Run','Week Number',
                                         'Asst Clin Hrs','Diag Reject Hrs']]
         
-        df_weekly_col1_unpivot = pd.melt(df_weekly_col1, value_vars=[
-                                        'Pack Send Hrs',
-                                        'Obs Visit Hrs','MDT Prep Hrs',
+        df_weekly_col9_unpivot = pd.melt(df_weekly_col9, value_vars=[
                                         'Asst Clin Hrs','Diag Reject Hrs'],
                                         id_vars=['Run','Week Number'])
         
-        df_weekly_col2 = df_weekly_stats[['Run','Week Number','Pack Reject Hrs',
-                                        'Obs Reject Hrs','MDT Meet Hrs',
+        df_weekly_col10 = df_weekly_stats[['Run','Week Number',
                                         'Asst Admin Hrs','Diag Accept Hrs']]
         
-        df_weekly_col2_unpivot = pd.melt(df_weekly_col2, value_vars=[
-                                        'Pack Reject Hrs',
-                                        'Obs Reject Hrs','MDT Meet Hrs',
+        df_weekly_col10_unpivot = pd.melt(df_weekly_col10, value_vars=[
                                         'Asst Admin Hrs','Diag Accept Hrs'],
                                         id_vars=['Run','Week Number'])
         
@@ -280,6 +303,7 @@ if button_run_pressed:
                                         'Referral Screen Hrs','Triage Clin Hrs',
                                         'Triage Admin Hrs','Triage Reject Hrs',
                                         'Pack Reject Hrs','Obs Reject Hrs',
+                                        'MDT Reject Hrs',
                                         'Asst Clin Hrs','Asst Admin Hrs',
                                         'Diag Accept Hrs','Diag Reject Hrs']]
 
@@ -287,6 +311,7 @@ if button_run_pressed:
                                         'Referral Screen Hrs','Triage Clin Hrs',
                                         'Triage Admin Hrs','Triage Reject Hrs',
                                         'Pack Reject Hrs','Obs Reject Hrs',
+                                        'MDT Reject Hrs',
                                         'Asst Clin Hrs','Asst Admin Hrs',
                                         'Diag Accept Hrs','Diag Reject Hrs'
                                         ]].mean().reset_index()
@@ -295,6 +320,7 @@ if button_run_pressed:
                                         'Referral Screen Hrs','Triage Clin Hrs',
                                         'Triage Admin Hrs','Triage Reject Hrs',
                                         'Pack Reject Hrs','Obs Reject Hrs',
+                                        'MDT Reject Hrs',
                                         'Asst Clin Hrs','Asst Admin Hrs',
                                         'Diag Accept Hrs','Diag Reject Hrs'],
                                         id_vars=['Week Number'])
@@ -591,6 +617,8 @@ if button_run_pressed:
 
             st.subheader(section_title)
 
+            ##### Referral Screening #####
+
             df_ref_screen_avg = df_weekly_ref_screen.groupby(['Week Number'])['Referral Screen Hrs'].mean().reset_index()
             
             fig = px.histogram(df_ref_screen_avg, 
@@ -598,7 +626,7 @@ if button_run_pressed:
                                 y='Referral Screen Hrs',
                                 nbins=sim_duration_input,
                                 labels={'Referral Screen Hrs': 'Hours'},
-                                color_discrete_sequence=['blue'],
+                                color_discrete_sequence=['green'],
                                 title=f'Referral Screening Hours by Week')
             
             fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
@@ -609,6 +637,8 @@ if button_run_pressed:
             st.plotly_chart(fig, use_container_width=True)
 
             st.divider()
+
+            ##### Triage #####
 
             col1, col2, col3 = st.columns(3)
 
@@ -623,7 +653,7 @@ if button_run_pressed:
                                     y='Triage Clin Hrs',
                                     nbins=sim_duration_input,
                                     labels={'Triage Clin Hrs': 'Hours'},
-                                    color_discrete_sequence=['blue'],
+                                    color_discrete_sequence=['green'],
                                     title=f'Triage Clinical Hours by Week')
                 
                 fig.update_layout(title_x=0.3,font=dict(size=10),bargap=0.2)
@@ -669,7 +699,7 @@ if button_run_pressed:
                                     y='Triage Reject Hrs',
                                     nbins=sim_duration_input,
                                     labels={'Triage Reject Hrs': 'Hours'},
-                                    color_discrete_sequence=['blue'],
+                                    color_discrete_sequence=['red'],
                                     title=f'Triage Rejection Hours by Week')
                 
                 fig.update_layout(title_x=0.3,font=dict(size=10),bargap=0.2)
@@ -681,39 +711,40 @@ if button_run_pressed:
 
                 st.divider()
 
-            col1, col2 = st.columns(2)
+            ##### Pack & Obs #####
+
+            col4, col5 = st.columns(2)
             
-            with col1:
+            with col4:
             
-                for i, list_name in enumerate(df_weekly_col1_unpivot['variable']
+                for i, list_name in enumerate(df_weekly_col4_unpivot['variable']
                                             .unique()):
 
                     if list_name == 'Pack Send Hrs':
                         section_title = 'Information Packs'
                     elif list_name == 'Obs Visit Hrs':
                         section_title = 'Observations'
-                    elif list_name == 'MDT Prep Hrs':
-                        section_title = 'MDT'
-                    elif list_name == 'Asst Clin Hrs':
-                        section_title = 'Assessment'
-                    elif list_name == 'Diag Reject Hrs':
-                        section_title = 'Diagnosis'
 
+                    if list_name == 'Pack Send Hrs':
+                        chart_colour = 'blue'
+                    elif list_name == 'Obs Visit Hrs':
+                        chart_colour = 'green'
+                    
                     st.subheader(section_title)
 
-                    df_weekly_col1_filtered = df_weekly_col1_unpivot[
-                                        df_weekly_col1_unpivot["variable"]==list_name]
+                    df_weekly_col4_filtered = df_weekly_col4_unpivot[
+                                        df_weekly_col4_unpivot["variable"]==list_name]
                     
-                    weekly_avg_hrs_col1 = df_weekly_col1_filtered.groupby(['Week Number',
+                    weekly_avg_hrs_col4 = df_weekly_col4_filtered.groupby(['Week Number',
                                                     'variable'])['value'
                                                     ].mean().reset_index()
                     
-                    fig = px.histogram(weekly_avg_hrs_col1, 
+                    fig = px.histogram(weekly_avg_hrs_col4, 
                                        x="Week Number",
                                        y='value',
                                        nbins=sim_duration_input,
                                        labels={"value": "Hours"},
-                                       color_discrete_sequence=["blue"],
+                                       color_discrete_sequence=[chart_colour],
                                        title=f'{list_name} by Week')
                    
                     # get rid of 'variable' prefix resulting from df.melt
@@ -727,26 +758,184 @@ if button_run_pressed:
 
                     st.divider()
 
-            with col2:
+            with col5:
             
-                for i, list_name in enumerate(df_weekly_col2_unpivot['variable']
+                for i, list_name in enumerate(df_weekly_col5_unpivot['variable']
                                             .unique()):
 
                     st.subheader('')
                     
-                    df_weekly_col2_filtered = df_weekly_col2_unpivot[
-                                        df_weekly_col2_unpivot["variable"]==list_name]
+                    df_weekly_col5_filtered = df_weekly_col5_unpivot[
+                                        df_weekly_col5_unpivot["variable"]==list_name]
                     
-                    weekly_avg_hrs_col2 = df_weekly_col2_filtered.groupby(['Week Number',
+                    weekly_avg_hrs_col5 = df_weekly_col5_filtered.groupby(['Week Number',
                                                     'variable'])['value'
                                                     ].mean().reset_index()
                     
-                    fig = px.histogram(weekly_avg_hrs_col1, 
+                    fig = px.histogram(weekly_avg_hrs_col5, 
                                        x="Week Number",
                                        y='value',
                                        nbins=sim_duration_input,
                                        labels={"value": "Hours"},
-                                       color_discrete_sequence=["green"],
+                                       color_discrete_sequence=["red"],
+                                       title=f'{list_name} by Week')
+                   
+                    # get rid of 'variable' prefix resulting from df.melt
+                    fig.for_each_annotation(lambda a: a.update(text=a.text.split
+                                                            ("=")[1]))
+                    fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
+                    fig.update_traces(marker_line_color='black', marker_line_width=1)
+                    #fig.
+
+                    st.plotly_chart(fig, use_container_width=True)
+
+                    st.divider()
+
+            ##### MDT #####
+            
+            col6, col7, col8 = st.columns(3)
+
+            with col6:
+
+                st.subheader('MDT')
+
+                df_mdt_prep_avg = df_weekly_mdt_prep.groupby(['Week Number'])['MDT Prep Hrs'].mean().reset_index()
+                
+                fig = px.histogram(df_mdt_prep_avg, 
+                                    x='Week Number',
+                                    y='MDT Prep Hrs',
+                                    nbins=sim_duration_input,
+                                    labels={'MDT Prep Hrs': 'Hours'},
+                                    color_discrete_sequence=['blue'],
+                                    title=f'MDT Prep Hours by Week')
+                
+                fig.update_layout(title_x=0.3,font=dict(size=10),bargap=0.2)
+                
+                fig.update_traces(marker_line_color='black', marker_line_width=1)
+                #fig.
+
+                st.plotly_chart(fig, use_container_width=True)
+
+                st.divider()
+
+            with col7:
+
+                st.subheader('')
+
+                df_mdt_meet_avg = df_weekly_mdt_meet.groupby(['Week Number'])['MDT Meet Hrs'].mean().reset_index()
+                
+                fig = px.histogram(df_mdt_meet_avg, 
+                                    x='Week Number',
+                                    y='MDT Meet Hrs',
+                                    nbins=sim_duration_input,
+                                    labels={'MDT Meet Hrs': 'Hours'},
+                                    color_discrete_sequence=['goldenrod'],
+                                    title=f'MDT Meeting Hours by Week')
+                
+                fig.update_layout(title_x=0.3,font=dict(size=10),bargap=0.2)
+                
+                fig.update_traces(marker_line_color='black', marker_line_width=1)
+                #fig.
+
+                st.plotly_chart(fig, use_container_width=True)
+
+                st.divider()
+
+            with col8:
+
+                st.subheader('')
+
+                df_mdt_rej_avg = df_weekly_mdt_rej.groupby(['Week Number'])['MDT Meet Hrs'].mean().reset_index()
+                
+                fig = px.histogram(df_mdt_rej_avg, 
+                                    x='Week Number',
+                                    y='MDT Reject Hrs',
+                                    nbins=sim_duration_input,
+                                    labels={'MDT Reject Hrs': 'Hours'},
+                                    color_discrete_sequence=['red'],
+                                    title=f'MDT Rejection Hours by Week')
+                
+                fig.update_layout(title_x=0.3,font=dict(size=10),bargap=0.2)
+                
+                fig.update_traces(marker_line_color='black', marker_line_width=1)
+                #fig.
+
+                st.plotly_chart(fig, use_container_width=True)
+
+                st.divider()
+
+            ##### Asst & Diagnosis #####
+
+            col9, col10 = st.columns(2)
+            
+            with col9:
+            
+                for i, list_name in enumerate(df_weekly_col9_unpivot['variable']
+                                            .unique()):
+
+                    if list_name == 'Asst Clin Hrs':
+                        section_title = 'Assessment'
+                    elif list_name == 'Diag Reject Hrs':
+                        section_title = 'Diagnosis'
+
+                    if list_name == 'Asst Clin Hrs':
+                        chart_colour = 'green'
+                    elif list_name == 'Diag Reject Hrs':
+                        chart_colour = 'red'
+
+                    st.subheader(section_title)
+
+                    df_weekly_col9_filtered = df_weekly_col9_unpivot[
+                                        df_weekly_col9_unpivot["variable"]==list_name]
+                    
+                    weekly_avg_hrs_col9 = df_weekly_col9_filtered.groupby(['Week Number',
+                                                    'variable'])['value'
+                                                    ].mean().reset_index()
+                    
+                    fig = px.histogram(weekly_avg_hrs_col9, 
+                                       x="Week Number",
+                                       y='value',
+                                       nbins=sim_duration_input,
+                                       labels={"value": "Hours"},
+                                       color_discrete_sequence=[chart_colour],
+                                       title=f'{list_name} by Week')
+                   
+                    # get rid of 'variable' prefix resulting from df.melt
+                    fig.for_each_annotation(lambda a: a.update(text=a.text.split
+                                                            ("=")[1]))
+                    fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
+                    fig.update_traces(marker_line_color='black', marker_line_width=1)
+                    #fig.
+
+                    st.plotly_chart(fig, use_container_width=True)
+
+                    st.divider()
+
+            with col10:
+            
+                for i, list_name in enumerate(df_weekly_col10_unpivot['variable']
+                                            .unique()):
+
+                    if list_name == 'Asst Admin Hrs':
+                        chart_colour = 'blue'
+                    elif list_name == 'Diag Accept Hrs':
+                        chart_colour = 'green'
+                    
+                    st.subheader('')
+                    
+                    df_weekly_col10_filtered = df_weekly_col10_unpivot[
+                                        df_weekly_col10_unpivot["variable"]==list_name]
+                    
+                    weekly_avg_hrs_col10 = df_weekly_col10_filtered.groupby(['Week Number',
+                                                    'variable'])['value'
+                                                    ].mean().reset_index()
+                    
+                    fig = px.histogram(weekly_avg_hrs_col10, 
+                                       x="Week Number",
+                                       y='value',
+                                       nbins=sim_duration_input,
+                                       labels={"value": "Hours"},
+                                       color_discrete_sequence=[chart_colour],
                                        title=f'{list_name} by Week')
                    
                     # get rid of 'variable' prefix resulting from df.melt
