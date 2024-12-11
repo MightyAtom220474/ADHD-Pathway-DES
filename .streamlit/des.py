@@ -615,7 +615,7 @@ if button_run_pressed:
 
         with tab2:
 
-            st.subheader(section_title)
+            st.subheader('Referrals')
 
             ##### Referral Screening #####
 
