@@ -845,7 +845,7 @@ if button_run_pressed:
 
                 st.subheader('')
 
-                df_mdt_rej_avg = df_weekly_mdt_rej.groupby(['Week Number'])['MDT Meet Hrs'].mean().reset_index()
+                df_mdt_rej_avg = df_weekly_mdt_rej.groupby(['Week Number'])['MDT Reject Hrs'].mean().reset_index()
                 
                 fig = px.histogram(df_mdt_rej_avg, 
                                     x='Week Number',

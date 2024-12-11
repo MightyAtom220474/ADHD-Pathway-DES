@@ -174,12 +174,12 @@ class Model:
         self.results_df['Return Time Pack'] = [0.0]
         self.results_df['Pack Rejected'] = [0]
         self.results_df['Time Pack Reject'] = [0.0]
-        #School Obs
+        # School Obs
         self.results_df['Time Obs Visit'] = [0.0]
         self.results_df['Return Time Obs'] = [0.0]
         self.results_df['Obs Rejected'] = [0]
         self.results_df['Time Obs Reject'] = [0.0]
-        # Triage
+        # MDT
         self.results_df['Q Time MDT'] = [0.0]
         self.results_df['Time to MDT'] = [0.0]
         self.results_df['Time Prep MDT'] = [0.0]
@@ -189,7 +189,7 @@ class Model:
         self.results_df['MDT WL Posn'] = [0]
         self.results_df['MDT Rejected'] = [0]
         self.results_df['MDT Time Reject'] = [0.0]
-        # Triage
+        # Asst
         self.results_df['Q Time Asst'] = [0.0]
         self.results_df['Time to Asst'] = [0.0]
         self.results_df['Asst Mins Clin'] = [0.0]
