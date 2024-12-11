@@ -122,6 +122,7 @@ class Patient:
         self.q_time_mdt = 0 # how long they waited for MDT
         self.place_on_mdt_wl = 0 # position they are on MDT waiting list
         self.mdt_rejected = 0 # were they rejected following MDT
+        self.mdt_time_reject = 0 # time taken notifying patient if rejected
 
         # Assessment
         self.q_time_asst = 0 # how long they waited for assessment
