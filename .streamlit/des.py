@@ -256,7 +256,8 @@ if button_run_pressed:
                                         'Obs Visit Hrs','MDT Prep Hrs',
                                         'Asst Clin Hrs','Diag Reject Hrs']]
         
-        df_weekly_col1_unpivot = pd.melt(df_weekly_col1, value_vars=['Pack Send Hrs',
+        df_weekly_col1_unpivot = pd.melt(df_weekly_col1, value_vars=[
+                                        'Pack Send Hrs',
                                         'Obs Visit Hrs','MDT Prep Hrs',
                                         'Asst Clin Hrs','Diag Reject Hrs'],
                                         id_vars=['Run','Week Number'])
@@ -265,7 +266,8 @@ if button_run_pressed:
                                         'Obs Reject Hrs','MDT Meet Hrs',
                                         'Asst Admin Hrs','Diag Accept Hrs']]
         
-        df_weekly_col2_unpivot = pd.melt(df_weekly_col2, value_vars=['Pack Reject Hrs',
+        df_weekly_col2_unpivot = pd.melt(df_weekly_col2, value_vars=[
+                                        'Pack Reject Hrs',
                                         'Obs Reject Hrs','MDT Meet Hrs',
                                         'Asst Admin Hrs','Diag Accept Hrs'],
                                         id_vars=['Run','Week Number'])
@@ -281,13 +283,21 @@ if button_run_pressed:
                                         'Asst Clin Hrs','Asst Admin Hrs',
                                         'Diag Accept Hrs','Diag Reject Hrs']]
 
-        df_weekly_b6_unpivot = pd.melt(df_weekly_b6, value_vars=['Run','Week Number',
+        df_weekly_b6_avg = df_weekly_b6.groupby(['Week Number'])[[
+                                        'Referral Screen Hrs','Triage Clin Hrs',
+                                        'Triage Admin Hrs','Triage Reject Hrs',
+                                        'Pack Reject Hrs','Obs Reject Hrs',
+                                        'Asst Clin Hrs','Asst Admin Hrs',
+                                        'Diag Accept Hrs','Diag Reject Hrs'
+                                        ]].mean().reset_index()
+        
+        df_weekly_b6_unpivot = pd.melt(df_weekly_b6_avg, value_vars=[
                                         'Referral Screen Hrs','Triage Clin Hrs',
                                         'Triage Admin Hrs','Triage Reject Hrs',
                                         'Pack Reject Hrs','Obs Reject Hrs',
                                         'Asst Clin Hrs','Asst Admin Hrs',
                                         'Diag Accept Hrs','Diag Reject Hrs'],
-                                        id_vars=['Run','Week Number'])
+                                        id_vars=['Week Number'])
         
         ##### Band 4 Practitioner
 
@@ -295,10 +305,15 @@ if button_run_pressed:
                                         'Obs Visit Hrs','Obs Reject Hrs',
                                         'MDT Prep Hrs','MDT Meet Hrs']]
 
-        df_weekly_b4_unpivot = pd.melt(df_weekly_b4, value_vars=['Run','Week Number',
+        df_weekly_b4_avg = df_weekly_b4.groupby(['Week Number'])[[
+                                        'Obs Visit Hrs','Obs Reject Hrs',
+                                        'MDT Prep Hrs','MDT Meet Hrs'
+                                        ]].mean().reset_index()
+
+        df_weekly_b4_unpivot = pd.melt(df_weekly_b4_avg, value_vars=[
                                         'Obs Visit Hrs','Obs Reject Hrs',
                                         'MDT Prep Hrs','MDT Meet Hrs'],
-                                        id_vars=['Run','Week Number'])
+                                        id_vars=['Week Number'])
         
                        
         tab1, tab2, tab3 = st.tabs(["Waiting Lists", "Clinical & Admin","Job Plans"])
