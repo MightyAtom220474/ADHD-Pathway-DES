@@ -307,14 +307,7 @@ if button_run_pressed:
                                         'Asst Clin Hrs','Asst Admin Hrs',
                                         'Diag Accept Hrs','Diag Reject Hrs']]
 
-        df_weekly_b6_avg = df_weekly_b6.groupby(['Week Number'])[[
-                                        'Referral Screen Hrs','Triage Clin Hrs',
-                                        'Triage Admin Hrs','Triage Reject Hrs',
-                                        'Pack Reject Hrs','Obs Reject Hrs',
-                                        'MDT Reject Hrs',
-                                        'Asst Clin Hrs','Asst Admin Hrs',
-                                        'Diag Accept Hrs','Diag Reject Hrs'
-                                        ]].mean().reset_index()
+        df_weekly_b6_avg = df_weekly_b6.groupby(['Week Number'], as_index=False).mean()
         
         df_weekly_b6_unpivot = pd.melt(df_weekly_b6_avg, value_vars=[
                                         'Referral Screen Hrs','Triage Clin Hrs',
@@ -331,10 +324,7 @@ if button_run_pressed:
                                         'Obs Visit Hrs','Obs Reject Hrs',
                                         'MDT Prep Hrs','MDT Meet Hrs']]
 
-        df_weekly_b4_avg = df_weekly_b4.groupby(['Week Number'])[[
-                                        'Obs Visit Hrs','Obs Reject Hrs',
-                                        'MDT Prep Hrs','MDT Meet Hrs'
-                                        ]].mean().reset_index()
+        df_weekly_b4_avg = df_weekly_b4.groupby(['Week Number'], as_index=False).mean()
 
         df_weekly_b4_unpivot = pd.melt(df_weekly_b4_avg, value_vars=[
                                         'Obs Visit Hrs','Obs Reject Hrs',
@@ -735,8 +725,8 @@ if button_run_pressed:
                     df_weekly_col4_filtered = df_weekly_col4_unpivot[
                                         df_weekly_col4_unpivot["variable"]==list_name]
                     
-                    weekly_avg_hrs_col4 = df_weekly_col4_filtered.groupby(['Week Number',
-                                                    'variable'])['value'
+                    weekly_avg_hrs_col4 = df_weekly_col4_filtered.groupby(['variable',
+                                                    'Week Number'])['value'
                                                     ].mean().reset_index()
                     
                     fig = px.histogram(weekly_avg_hrs_col4, 
@@ -768,8 +758,8 @@ if button_run_pressed:
                     df_weekly_col5_filtered = df_weekly_col5_unpivot[
                                         df_weekly_col5_unpivot["variable"]==list_name]
                     
-                    weekly_avg_hrs_col5 = df_weekly_col5_filtered.groupby(['Week Number',
-                                                    'variable'])['value'
+                    weekly_avg_hrs_col5 = df_weekly_col5_filtered.groupby(['variable',
+                                                    'Week Number'])['value'
                                                     ].mean().reset_index()
                     
                     fig = px.histogram(weekly_avg_hrs_col5, 
@@ -888,8 +878,8 @@ if button_run_pressed:
                     df_weekly_col9_filtered = df_weekly_col9_unpivot[
                                         df_weekly_col9_unpivot["variable"]==list_name]
                     
-                    weekly_avg_hrs_col9 = df_weekly_col9_filtered.groupby(['Week Number',
-                                                    'variable'])['value'
+                    weekly_avg_hrs_col9 = df_weekly_col9_filtered.groupby(['variable',
+                                                    'Week Number'])['value'
                                                     ].mean().reset_index()
                     
                     fig = px.histogram(weekly_avg_hrs_col9, 
@@ -926,8 +916,8 @@ if button_run_pressed:
                     df_weekly_col10_filtered = df_weekly_col10_unpivot[
                                         df_weekly_col10_unpivot["variable"]==list_name]
                     
-                    weekly_avg_hrs_col10 = df_weekly_col10_filtered.groupby(['Week Number',
-                                                    'variable'])['value'
+                    weekly_avg_hrs_col10 = df_weekly_col10_filtered.groupby(['variable',
+                                                    'Week Number'])['value'
                                                     ].mean().reset_index()
                     
                     fig = px.histogram(weekly_avg_hrs_col10, 
