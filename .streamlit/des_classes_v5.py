@@ -561,7 +561,7 @@ class Model:
 
                         self.results_df.at[p.id, 'Triage Rejected'] = 1
                         
-                        self.results_df['Triage Time Reject'] = self.random_normal(g.triage_discharge_time,g.std_dev)
+                        self.results_df.at[p.id, 'Triage Time Reject'] = self.random_normal(g.triage_discharge_time,g.std_dev)
 
                         #reject all the other parts of the pathway if triage rejected
                         # SR Comment - see above ref setting of these patient attributes
@@ -579,7 +579,7 @@ class Model:
 
                         ##### Now send out the Pack #####
 
-                        self.results_df['Time Pack Send'] = self.random_normal(g.pack_admin_time,g.std_dev)
+                        self.results_df.at[p.id, 'Time Pack Send'] = self.random_normal(g.pack_admin_time,g.std_dev)
 
                         # determine whether the pack was returned on time or not
                         if self.reject_pack < g.pack_rejection_rate:
@@ -589,7 +589,7 @@ class Model:
                                                                     self.sampled_pack_time
                             # Mark that the pack was returned on time
                             self.results_df.at[p.id, 'Pack Rejected'] = 1
-                            self.results_df['Time Pack Reject'] = self.random_normal(g.pack_reject_time,g.std_dev)
+                            self.results_df.at[p.id, 'Time Pack Reject'] = self.random_normal(g.pack_reject_time,g.std_dev)
                             #reject all the other parts of the pathway if pack rejected
                             self.reject_obs = g.obs_rejection_rate
                             self.reject_mdt = g.mdt_rejection_rate
@@ -607,7 +607,7 @@ class Model:
 
                             ##### Now do the Observations #####
 
-                            self.results_df['Time Obs Visit'] = self.random_normal(g.school_obs_time,g.std_dev)
+                            self.results_df.at[p.id, 'Time Obs Visit'] = self.random_normal(g.school_obs_time,g.std_dev)
 
                             # determine whether the obs were returned on time or not
                             if self.reject_obs < g.obs_rejection_rate:
@@ -619,7 +619,7 @@ class Model:
                                 # Record how long the patient took for Obs
                                 self.results_df.at[p.id, 'Return Time Obs'] = \
                                                                             self.sampled_obs_time
-                                self.results_df['Time Obs Reject'] = self.random_normal(g.obs_reject_time,g.std_dev)
+                                self.results_df.at[p.id, 'Time Obs Reject'] = self.random_normal(g.obs_reject_time,g.std_dev)
 
                                 #reject all the other parts of the pathway if obs rejected
                                 self.reject_mdt = g.mdt_rejection_rate
@@ -642,8 +642,8 @@ class Model:
                                 #print(f'Patient {p} MDT started')
                                 start_q_mdt = self.env.now
 
-                                self.results_df['Time Prep MDT'] = self.random_normal(g.mdt_prep_time,g.std_dev)
-                                self.results_df['Time Meet MDT'] = self.random_normal(g.mdt_meet_time,g.std_dev)
+                                self.results_df.at[p.id, 'Time Prep MDT'] = self.random_normal(g.mdt_prep_time,g.std_dev)
+                                self.results_df.at[p.id, 'Time Meet MDT'] = self.random_normal(g.mdt_meet_time,g.std_dev)
                                 # add referral to MDT waiting list as has passed obs
                                 g.number_on_mdt_wl += 1
 
@@ -680,7 +680,7 @@ class Model:
                                     if self.reject_mdt <= g.mdt_rejection_rate:
                                         self.results_df.at[p.id, 'MDT Rejected'] = 1
 
-                                        self.results_df['MDT Time Reject'] = self.random_normal(g.mdt_reject_time,g.std_dev)
+                                        self.results_df.at[p.id, 'MDT Time Reject'] = self.random_normal(g.mdt_reject_time,g.std_dev)
                                         #reject all the other parts of the pathway if mdt rejected
                                         self.reject_asst = g.asst_rejection_rate
 
@@ -743,13 +743,13 @@ class Model:
                                             if self.reject_asst <= g.asst_rejection_rate:
 
                                                 self.results_df.at[p.id, 'Asst Rejected'] = 1
-                                                self.results_df['Diag Rejected Time'] = self.random_normal(g.diag_time_disch,g.std_dev)
+                                                self.results_df.at[p.id,'Diag Rejected Time'] = self.random_normal(g.diag_time_disch,g.std_dev)
                                                 # release the resource once the Assessment is completed
                                                 yield self.env.timeout(sampled_asst_time)
 
                                             else:
                                                 self.results_df.at[p.id, 'Asst Rejected'] = 0
-                                                self.results_df['Diag Accepted Time'] = self.random_normal(g.diag_time_accept,g.std_dev)
+                                                self.results_df.at[p.id, 'Diag Accepted Time'] = self.random_normal(g.diag_time_accept,g.std_dev)
                                                 # release the resource once the Assessment is completed
                                                 yield self.env.timeout(sampled_asst_time)
 
@@ -867,10 +867,10 @@ class Trial:
         # Once the trial (i.e. all runs) has completed, print the final results
         return self.df_trial_results, pd.concat(self.weekly_wl_dfs)
     
-# my_trial = Trial()
-# pd.set_option('display.max_rows', 1000)
-# # Call the run_trial method of our Trial class object
+my_trial = Trial()
+pd.set_option('display.max_rows', 1000)
+# Call the run_trial method of our Trial class object
 
-# df_trial_results, df_weekly_stats = my_trial.run_trial()
+df_trial_results, df_weekly_stats = my_trial.run_trial()
 
-# df_trial_results, df_weekly_stats
+df_trial_results, df_weekly_stats
