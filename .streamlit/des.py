@@ -29,7 +29,7 @@ with st.sidebar:
 
     st.subheader("Model Inputs")
 
-    with st.expander("Referral Inputs"):
+    with st.expander("Referrals"):
 
         # Referral Inputs
         st.markdown("#### Referrals")
@@ -38,7 +38,7 @@ with st.sidebar:
                                         0.0, 10.0, 5.0)
         
     
-    with st.expander("Triage Inputs"):
+    with st.expander("Triage"):
         
         # Triage Inputs
         st.divider()
@@ -50,7 +50,7 @@ with st.sidebar:
         triage_clin_time_input =  st.slider("Avg Clinical Time per Triage (mins)", 20, 60, 48)
         triage_admin_time_input =  st.slider("Avg Admin Time per Triage (mins)", 20, 60, 48)
 
-    with st.expander("Pack & Observations Inputs"):
+    with st.expander("Pack & Observations"):
 
         # School/Home Assessment Packs
         st.divider()
@@ -66,7 +66,7 @@ with st.sidebar:
                                                                         ,2, 6, 4)
         obs_rejection_input = st.slider("Observations Rejection Rate (%)"
                                                                 , 0.0, 10.0, 1.0)
-    with st.expander("MDT Inputs"):
+    with st.expander("MDT"):
    
         # MDT Inputs
         st.divider()
@@ -75,7 +75,7 @@ with st.sidebar:
         mdt_target_input = st.slider("Number of Weeks to MDT", 0, 5, 1)
         mdt_resource_input =  st.slider("Number of MDT Slots p/w", 20, 60, 25)
 
-    with st.expander("Assessment Inputs"):
+    with st.expander("Assessment"):
     
         # Assessment Inputs
         st.divider()
@@ -88,6 +88,18 @@ with st.sidebar:
         asst_clin_time_input =  st.slider("Avg Clinical Time per Asst (mins)", 20, 60, 48)
         asst_admin_time_input =  st.slider("Avg Admin Time per Asst (mins)", 20, 60, 48)
 
+    with st.expander("Job Plans"):
+   
+        # MDT Inputs
+        st.divider()
+        st.markdown("#### Job Plans")
+        b6_prac_avail_input = st.number_input(label="Number of B6 Practitioner WTE",min_value=0.5,max_value=20,value = g.number_staff_b6_prac)
+        b6_prac_hours_input = st.slider("Number of B6 Hours per WTE", 0, 25, g.hours_avail_b6_prac)
+        b4_prac_avail_input = st.number_input(label="Number of B4 Practitoner WTE",min_value=0.5,max_value=20,value = g.number_staff_b4_prac)
+        b4_prac_hours_input = st.slider("Number of B4 Hours per WTE", 0, 25, g.hours_avail_b4_prac)
+        mdt_target_input = st.slider("Number of Weeks to MDT", 0, 5, 1)
+        mdt_resource_input =  st.slider("Number of MDT Slots p/w", 20, 60, 25)
+    
     with st.expander("Simulation Parameters"):
     
         st.divider()
@@ -117,6 +129,15 @@ g.target_asst_wait = asst_target_input
 g.asst_resource = asst_resource_input
 g.asst_time_clin = asst_clin_time_input
 g.asst_time_admin = asst_admin_time_input
+
+g.number_staff_b6_prac = b6_prac_avail_input
+g.number_staff_b4_prac = b4_prac_avail_input
+g.hours_avail_b6_prac = b6_prac_hours_input
+g.hours_avail_b4_prac = b4_prac_hours_input
+
+# calculate total hours for job plans
+total_b6_prac_hours = b6_prac_avail_input*b6_prac_hours_input
+total_b4_prac_hours = b4_prac_avail_input*b4_prac_hours_input
 
 g.sim_duration = sim_duration_input
 g.number_of_runs = number_of_runs_input
@@ -959,7 +980,13 @@ if button_run_pressed:
             fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
             
             fig.update_traces(marker_line_color='black', marker_line_width=1)
-            #fig.
+
+            # add line for available B4 hours
+            fig.add_trace(
+                                go.Scatter(x=weekly_avg_wt["Week Number"],
+                                        y=np.repeat(total_b6_prac_hours,g.sim_duration),
+                                        name='Target',line=dict(width=3,
+                                        color='green')))
 
             st.plotly_chart(fig, use_container_width=True)
 
@@ -979,7 +1006,13 @@ if button_run_pressed:
             fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
             
             fig.update_traces(marker_line_color='black', marker_line_width=1)
-            #fig.
+
+            # add line for available B4 hours
+            fig.add_trace(
+                                go.Scatter(x=weekly_avg_wt["Week Number"],
+                                        y=np.repeat(total_b4_prac_hours,g.sim_duration),
+                                        name='Target',line=dict(width=3,
+                                        color='green')))
 
             st.plotly_chart(fig, use_container_width=True)
 

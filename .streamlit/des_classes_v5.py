@@ -69,6 +69,12 @@ class g:
     diag_time_disch = 90 # time taken after asst if discharged
     diag_time_accept = 150 # time taken after asst if accepted
 
+    # Job Plans
+    number_staff_b6_prac = 9
+    number_staff_b4_prac = 10
+    hours_avail_b6_prac = 20
+    hours_avail_b4_prac = 22
+
     # Simulation
     sim_duration = 52
     number_of_runs = 10
