@@ -93,13 +93,11 @@ with st.sidebar:
         # MDT Inputs
         st.divider()
         st.markdown("#### Job Plans")
-        b6_prac_avail_input = st.number_input(label="Number of B6 Practitioner WTE",min_value=0.5,max_value=20,value = g.number_staff_b6_prac)
-        b6_prac_hours_input = st.slider("Number of B6 Hours per WTE", 0, 25, g.hours_avail_b6_prac)
-        b4_prac_avail_input = st.number_input(label="Number of B4 Practitoner WTE",min_value=0.5,max_value=20,value = g.number_staff_b4_prac)
-        b4_prac_hours_input = st.slider("Number of B4 Hours per WTE", 0, 25, g.hours_avail_b4_prac)
-        mdt_target_input = st.slider("Number of Weeks to MDT", 0, 5, 1)
-        mdt_resource_input =  st.slider("Number of MDT Slots p/w", 20, 60, 25)
-    
+        b6_prac_avail_input = st.number_input(label="Number of B6 Practitioner WTE",min_value=0.5,max_value=20.0,value = g.number_staff_b6_prac)
+        b6_prac_hours_input = st.slider(label="Number of B6 Hours per WTE", min_value=0.0, max_value=25.0, value=g.hours_avail_b6_prac)
+        b4_prac_avail_input = st.number_input(label="Number of B4 Practitioner WTE",min_value=0.5,max_value=20.0,value = g.number_staff_b4_prac)
+        b4_prac_hours_input = st.slider(label="Number of B4 Hours per WTE", min_value=0.0, max_value=25.0, value=g.hours_avail_b4_prac)
+            
     with st.expander("Simulation Parameters"):
     
         st.divider()
@@ -975,9 +973,10 @@ if button_run_pressed:
                                 labels={'value': 'Hours'
                                         ,'variable':'Time Alloc'},
                                 color='variable',
+                                color_discrete_sequence=px.colors.qualitative.Dark24,
                                 title=f'Band 6 Practitioner Hours by Week')
             
-            fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
+            fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2,legend_traceorder="reversed")
             
             fig.update_traces(marker_line_color='black', marker_line_width=1)
 
@@ -985,7 +984,7 @@ if button_run_pressed:
             fig.add_trace(
                                 go.Scatter(x=weekly_avg_wt["Week Number"],
                                         y=np.repeat(total_b6_prac_hours,g.sim_duration),
-                                        name='Target',line=dict(width=3,
+                                        name='Avail Hrs',line=dict(width=3,
                                         color='green')))
 
             st.plotly_chart(fig, use_container_width=True)
@@ -1001,9 +1000,10 @@ if button_run_pressed:
                                 labels={'value': 'Hours'
                                         ,'variable':'Time Alloc'},
                                 color='variable',
+                                color_discrete_sequence=px.colors.qualitative.Light24,
                                 title=f'Band 4 Practitioner Hours by Week')
             
-            fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2)
+            fig.update_layout(title_x=0.4,font=dict(size=10),bargap=0.2,legend_traceorder="reversed")
             
             fig.update_traces(marker_line_color='black', marker_line_width=1)
 
@@ -1011,9 +1011,9 @@ if button_run_pressed:
             fig.add_trace(
                                 go.Scatter(x=weekly_avg_wt["Week Number"],
                                         y=np.repeat(total_b4_prac_hours,g.sim_duration),
-                                        name='Target',line=dict(width=3,
+                                        name='Avail Hrs',line=dict(width=3,
                                         color='green')))
-
+            
             st.plotly_chart(fig, use_container_width=True)
 
             st.divider()

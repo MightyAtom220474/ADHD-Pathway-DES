@@ -20,7 +20,7 @@ import pandas as pd
 # inside.
 class g:
 
-    debug_level = 1
+    debug_level = 0
 
     # Referrals
     mean_referrals_pw = 60
@@ -70,10 +70,10 @@ class g:
     diag_time_accept = 150 # time taken after asst if accepted
 
     # Job Plans
-    number_staff_b6_prac = 9
-    number_staff_b4_prac = 10
-    hours_avail_b6_prac = 20
-    hours_avail_b4_prac = 22
+    number_staff_b6_prac = 9.0
+    number_staff_b4_prac = 10.0
+    hours_avail_b6_prac = 20.0
+    hours_avail_b4_prac = 22.0
 
     # Simulation
     sim_duration = 52
@@ -373,9 +373,9 @@ class Model:
                 if g.debug_level >= 2:
                     print(f"New asst Level: {self.mdt_res.level}")
 
-            print(f'Triage slots available: {self.triage_res.level} (of intended {g.triage_resource})')
-            print(f'MDT slots available: {self.mdt_res.level} (of intended {g.mdt_resource})')
-            print(f'Assessment slots available: {self.asst_res.level} (of intended {g.asst_resource})')
+            #print(f'Triage slots available: {self.triage_res.level} (of intended {g.triage_resource})')
+            #print(f'MDT slots available: {self.mdt_res.level} (of intended {g.mdt_resource})')
+            #print(f'Assessment slots available: {self.asst_res.level} (of intended {g.asst_resource})')
 
             # Wait one unit of simulation time (1 week)
             yield(self.env.timeout(1))
@@ -873,10 +873,10 @@ class Trial:
         # Once the trial (i.e. all runs) has completed, print the final results
         return self.df_trial_results, pd.concat(self.weekly_wl_dfs)
     
-my_trial = Trial()
-pd.set_option('display.max_rows', 1000)
-# Call the run_trial method of our Trial class object
+# my_trial = Trial()
+# pd.set_option('display.max_rows', 1000)
+# # Call the run_trial method of our Trial class object
 
-df_trial_results, df_weekly_stats = my_trial.run_trial()
+# df_trial_results, df_weekly_stats = my_trial.run_trial()
 
-df_trial_results, df_weekly_stats
+# df_trial_results, df_weekly_stats
