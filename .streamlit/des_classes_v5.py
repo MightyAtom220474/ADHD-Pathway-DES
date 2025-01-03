@@ -264,14 +264,14 @@ class Model:
             # Start up the referral generator function
             self.env.process(self.generator_patient_referrals())
 
-            self.referral_tot_screen = self.results_df['Referral Time Screen'].sum()
+            self.referral_tot_screen = self.results_df['Referral Time Screen'
+                                                                        ].sum()
             self.max_triage_wl = self.results_df["Triage WL Posn"].max()
             self.triage_rej = self.results_df["Triage Rejected"].sum()
             self.triage_avg_wait = self.results_df["Q Time Triage"].mean()
             self.triage_tot_clin = self.results_df['Triage Mins Clin'].sum()
             self.triage_tot_admin = self.results_df['Triage Mins Admin'].sum()
             self.triage_tot_reject = self.results_df['Triage Time Reject'].sum()
-            #self.triage_targ_wait = g.target_triage_wait
             self.pack_tot_send = self.results_df["Time Pack Send"].sum()
             self.pack_rej = self.results_df["Pack Rejected"].sum()
             self.pack_tot_rej = self.results_df["Time Pack Reject"].sum()
@@ -284,7 +284,6 @@ class Model:
             self.mdt_tot_rej = self.results_df["MDT Time Reject"].sum()
             self.mdt_rej = self.results_df["MDT Rejected"].sum()
             self.mdt_avg_wait = self.results_df["Q Time MDT"].mean()
-            #self.mdt_targ_wait = g.target_mdt_wait
             self.max_asst_wl = self.results_df["Asst WL Posn"].max()
             self.asst_rej = self.results_df["Asst Rejected"].sum()
             self.asst_avg_wait = self.results_df["Q Time Asst"].mean()
@@ -292,7 +291,6 @@ class Model:
             self.asst_tot_admin = self.results_df['Asst Mins Admin'].sum()
             self.diag_tot_rej = self.results_df['Diag Rejected Time'].sum()
             self.diag_tot_acc = self.results_df['Diag Accepted Time'].sum()
-            #self.asst_targ_wait = g.target_asst_wait
 
             # weekly waiting list positions
             self.df_weekly_stats.append(
@@ -327,10 +325,7 @@ class Model:
                 }
                 )
             
-            # # SR Comment - can remove this as have done in a slightly different way
-            # # You will want to remove this and
-            # g.weekly_wl_posn = pd.DataFrame.from_dict(self.df_weekly_stats)
-            
+                     
             # replenish resources ready for next week
             # SR comment: it seems here if you try to put in an amount that would cause it to exceed
             # the maximum capacity, it will wait until the container is empty before replenishing
@@ -776,15 +771,15 @@ class Model:
 
             return self.results_df
 
-    def calculate_weekly_results(self):
-        # Take the mean of the queuing times and the maximum waiting list
-        # across patients in this run of the model
-        self.mean_q_time_triage = self.results_df["Q Time Triage"].mean()
-        self.max_triage_wl = self.results_df["Triage WL Posn"].max()
-        self.mean_q_time_mdt = self.results_df["Q Time MDT"].mean()
-        self.max_mdt_wl = self.results_df["MDT WL Posn"].max()
-        self.mean_q_time_asst = self.results_df["Q Time Asst"].mean()
-        self.max_asst_wl = self.results_df["Asst WL Posn"].max()
+    # def calculate_weekly_results(self):
+    #     # Take the mean of the queuing times and the maximum waiting list
+    #     # across patients in this run of the model
+    #     self.mean_q_time_triage = self.results_df["Q Time Triage"].mean()
+    #     self.max_triage_wl = self.results_df["Triage WL Posn"].max()
+    #     self.mean_q_time_mdt = self.results_df["Q Time MDT"].mean()
+    #     self.max_mdt_wl = self.results_df["MDT WL Posn"].max()
+    #     self.mean_q_time_asst = self.results_df["Q Time Asst"].mean()
+    #     self.max_asst_wl = self.results_df["Asst WL Posn"].max()
 
     # This method calculates results over each single run
     def calculate_run_results(self):
