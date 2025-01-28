@@ -73,7 +73,7 @@ with st.sidebar:
         st.markdown("#### MDT")
         mdt_rejection_input = st.slider("MDT Rejection Rate (%)", 0.0, 10.0, 5.0)
         mdt_target_input = st.slider("Number of Weeks to MDT", 0, 5, 1)
-        mdt_resource_input =  st.slider("Number of MDT Slots p/w", 20, 60, 25)
+        mdt_resource_input =  st.slider("Number of MDT Slots p/w", 20, 60, 60)
 
     with st.expander("Assessment"):
     
@@ -226,6 +226,9 @@ if button_run_pressed:
         
         df_weekly_wl = df_weekly_stats[['Run','Week Number','Triage WL',
                                         'MDT WL','Asst WL']]
+
+        df_weekly_wl = df_weekly_wl['Asst WL']+1176    
+    
 
         df_weekly_wl_unpivot = pd.melt(df_weekly_wl, value_vars=['Triage WL',
                                                                  'MDT WL',
