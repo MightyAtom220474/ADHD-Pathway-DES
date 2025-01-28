@@ -35,7 +35,7 @@ with st.sidebar:
         st.markdown("#### Referrals")
         referral_input = st.slider("Number of Referrals Per Week", 1, 100, 50)
         referral_reject_input = st.slider("Referral Rejection Rate (%)",
-                                        0.0, 10.0, 5.0)
+                                        0.0, 10.0, 4.24)
         
     
     with st.expander("Triage"):
@@ -44,9 +44,9 @@ with st.sidebar:
         st.divider()
         st.markdown("#### Triage")
         triage_rejection_input = st.slider("Triage Rejection Rate (%)",
-                                        0.0, 10.0, 5.0)
+                                        0.0, 10.0, 7.0)
         triage_target_input = st.slider("Number of Weeks to Triage", 1, 10, 4)
-        triage_resource_input =  st.slider("Number of Triage Slots p/w", 20, 60, 48)
+        triage_resource_input =  st.slider("Number of Triage Slots p/w", 20, 60, 43)
         triage_clin_time_input =  st.slider("Avg Clinical Time per Triage (mins)", 20, 60, 48)
         triage_admin_time_input =  st.slider("Avg Admin Time per Triage (mins)", 20, 60, 48)
 
@@ -81,12 +81,12 @@ with st.sidebar:
         st.divider()
         st.markdown("#### Assessment")
         asst_rejection_input = st.slider("Assessment Rejection Rate (%)",
-                                        0.0, 10.0, 1.0)
+                                        0.0, 10.0, 3.0)
         asst_target_input = st.slider("Number of Weeks to Assess", 0, 5, 4)
         asst_resource_input =  st.slider("Number of Assessment Slots p/w",
-                                        40, 80, 62)
-        asst_clin_time_input =  st.slider("Avg Clinical Time per Asst (mins)", 20, 60, 48)
-        asst_admin_time_input =  st.slider("Avg Admin Time per Asst (mins)", 20, 60, 48)
+                                        0, 80, 28)
+        asst_clin_time_input =  st.slider("Avg Clinical Time per Asst (mins)", 60, 120, 90)
+        asst_admin_time_input =  st.slider("Avg Admin Time per Asst (mins)", 60, 120, 90)
 
     with st.expander("Job Plans"):
    
