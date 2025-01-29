@@ -34,19 +34,18 @@ with st.sidebar:
         # Referral Inputs
         st.markdown("#### Referrals")
         referral_input = st.slider("Number of Referrals Per Week", 1, 100, 50)
-        referral_reject_input = st.slider("Referral Rejection Rate (%)",
-                                        0.0, 10.0, 4.24)
-        
-    
+        referral_reject_input = st.number_input("Referral Rejection Rate (%)",
+                        min_value=0.0, max_value=20.0, step=0.25, value=4.25)
+           
     with st.expander("Triage"):
         
         # Triage Inputs
         st.divider()
         st.markdown("#### Triage")
-        triage_rejection_input = st.slider("Triage Rejection Rate (%)",
-                                        0.0, 10.0, 7.0)
+        triage_rejection_input = st.number_input("Triage Rejection Rate (%)",
+                        min_value=0.0, max_value=20.0, step=0.25, value=7.0)
         triage_target_input = st.slider("Number of Weeks to Triage", 1, 10, 4)
-        triage_resource_input =  st.slider("Number of Triage Slots p/w", 20, 60, 43)
+        triage_resource_input =  st.slider("Number of Triage Slots p/w", 0, 100, 43)
         triage_clin_time_input =  st.slider("Avg Clinical Time per Triage (mins)", 20, 60, 48)
         triage_admin_time_input =  st.slider("Avg Admin Time per Triage (mins)", 20, 60, 48)
 
@@ -57,34 +56,35 @@ with st.sidebar:
         st.markdown("#### School/Home Assessment Packs")
         target_pack_input = st.slider("Number of Weeks to Return Information Pack"
                                                                         ,2, 6, 3)
-        pack_rejection_input = st.slider("Assessment Pack Rejection Rate (%)"
-                                                                , 0.0, 10.0, 3.0)
+        pack_rejection_input = st.number_input("Pack Rejection Rate (%)",
+                        min_value=0.0, max_value=20.0, step=0.25, value=3.0)
         # Observations
         st.divider()
         st.markdown("#### QB and Observations")
         target_obs_input = st.slider("Number of Weeks to Return Observations"
                                                                         ,2, 6, 4)
-        obs_rejection_input = st.slider("Observations Rejection Rate (%)"
-                                                                , 0.0, 10.0, 1.0)
+        obs_rejection_input = st.number_input("Observations Rejection Rate (%)",
+                        min_value=0.0, max_value=20.0, step=0.25, value=1.0)
     with st.expander("MDT"):
    
         # MDT Inputs
         st.divider()
         st.markdown("#### MDT")
-        mdt_rejection_input = st.slider("MDT Rejection Rate (%)", 0.0, 10.0, 5.0)
+        mdt_rejection_input = st.number_input("MDT Rejection Rate (%)",
+                        min_value=0.0, max_value=20.0, step=0.25, value=5.0)
         mdt_target_input = st.slider("Number of Weeks to MDT", 0, 5, 1)
-        mdt_resource_input =  st.slider("Number of MDT Slots p/w", 20, 60, 60)
+        mdt_resource_input =  st.slider("Number of MDT Slots p/w", 0, 100, 60)
 
     with st.expander("Assessment"):
     
         # Assessment Inputs
         st.divider()
         st.markdown("#### Assessment")
-        asst_rejection_input = st.slider("Assessment Rejection Rate (%)",
-                                        0.0, 10.0, 3.0)
+        asst_rejection_input = st.number_input("Referral Rejection Rate (%)",
+                        min_value=0.0, max_value=20.0, step=0.25, value=3.0)
         asst_target_input = st.slider("Number of Weeks to Assess", 0, 5, 4)
         asst_resource_input =  st.slider("Number of Assessment Slots p/w",
-                                        0, 80, 28)
+                                        0, 100, 28)
         asst_clin_time_input =  st.slider("Avg Clinical Time per Asst (mins)", 60, 120, 90)
         asst_admin_time_input =  st.slider("Avg Admin Time per Asst (mins)", 60, 120, 90)
 
@@ -102,9 +102,9 @@ with st.sidebar:
     
         st.divider()
         st.markdown("#### Simulation Parameters")
-        sim_duration_input =  st.slider("Simulation Duration (weeks)", 1, 260, 52)
+        sim_duration_input =  st.slider("Simulation Duration (weeks)", 1, 520, 52)
         st.write(f"The service is running for {sim_duration_input} weeks")
-        number_of_runs_input = st.slider("Number of Simulation Runs", 1, 100, 10)
+        number_of_runs_input = st.slider("Number of Simulation Runs", 1, 20, 10)
 
 g.mean_referrals_pw = referral_input
 g.base_waiting_list = 2741
