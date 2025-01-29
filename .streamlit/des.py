@@ -227,9 +227,6 @@ if button_run_pressed:
         df_weekly_wl = df_weekly_stats[['Run','Week Number','Triage WL',
                                         'MDT WL','Asst WL']]
 
-        df_weekly_wl['Asst WL'] = df_weekly_wl['Asst WL']+1176    
-    
-
         df_weekly_wl_unpivot = pd.melt(df_weekly_wl, value_vars=['Triage WL',
                                                                  'MDT WL',
                                                                  'Asst WL'],
