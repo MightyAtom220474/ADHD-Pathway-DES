@@ -161,7 +161,7 @@ if button_run_pressed:
         df_trial_results, df_weekly_stats = my_trial.run_trial()
 
         st.subheader(f'Summary of all {g.number_of_runs} Simulation Runs over {g.sim_duration}'
-                     ' Weeks with {b6_prac_add_input} Additional B6 and {b4_prac_add_input} Additional B4')
+                     f' Weeks with {b6_prac_add_input} Additional B6 and {b4_prac_add_input} Additional B4')
         
         # turn mins values from running total to weekly total in hours
         df_weekly_stats['Referral Screen Hrs'] = (df_weekly_stats['Referral Screen Mins']-df_weekly_stats['Referral Screen Mins'].shift(1))/60
