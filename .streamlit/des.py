@@ -114,7 +114,7 @@ g.base_waiting_list = 2741
 g.referral_rejection_rate = referral_reject_input/100
 g.triage_rejection_rate = triage_rejection_input/100
 g.target_triage_wait = triage_target_input
-g.triage_resource = triage_resource_input * (b6_prac_avail_input+b6_prac_add_input)
+g.triage_resource = int(triage_resource_input * (b6_prac_avail_input+b6_prac_add_input))
 g.triage_time_clin = triage_clin_time_input
 g.triage_time_admin = triage_admin_time_input
 g.target_pack_wait = target_pack_input
@@ -127,7 +127,7 @@ g.mdt_resource = mdt_resource_input
 
 g.asst_rejection_rate = asst_rejection_input/100
 g.target_asst_wait = asst_target_input
-g.asst_resource = asst_resource_input * (b6_prac_avail_input+b6_prac_add_input)
+g.asst_resource = int(asst_resource_input * (b6_prac_avail_input+b6_prac_add_input))
 g.asst_time_clin = asst_clin_time_input
 g.asst_time_admin = asst_admin_time_input
 
