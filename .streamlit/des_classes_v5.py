@@ -32,7 +32,7 @@ class g:
     target_triage_wait = 4 # triage within 4 weeks
     triage_waiting_list = 0 # number waiting for triage
     triage_rejection_rate = 0.05 # % rejected at triage, assume 5%
-    triage_resource = 48 # number of triage slots p/w @ 10 mins
+    
     triage_clin_time = 60 # number of mins for clinician to do triage
     triage_admin_time = 15 # number of mins of admin to do triage
     triage_discharge_time = 45 # time taken if discharged at triage
@@ -74,7 +74,11 @@ class g:
     number_staff_b4_prac = 10.0
     hours_avail_b6_prac = 20.0
     hours_avail_b4_prac = 22.0
-
+    staff_weeks_lost = 10
+    weeks_lost_pc = (52-staff_weeks_lost)/52
+    triage_resource = int(48*weeks_lost_pc) # number of triage slots p/w @ 10 mins
+    asst_resource = int(62*weeks_lost_pc) # number of assessment slots p/w @ 60 mins
+    
     # Simulation
     sim_duration = 52
     number_of_runs = 10
