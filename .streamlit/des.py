@@ -100,6 +100,8 @@ with st.sidebar:
         b4_prac_hours_input = st.slider(label="Number of B4 Hours per WTE", min_value=0.0, max_value=25.0, value=g.hours_avail_b4_prac)
         b4_prac_add_input = st.number_input("Additional Number of B4 Practitioners WTE",
                         min_value=0.0, max_value=20.0, step=0.5, value=0.0)
+        weeks_lost_input = st.number_input("Weeks Lost to Leave/Sickness etc.",
+                        min_value=0.0, max_value=20.0, step=0.25, value=10.0)
             
     with st.expander("Simulation Parameters"):
     
@@ -124,6 +126,7 @@ g.obs_rejection_rate = obs_rejection_input/100
 g.mdt_rejection_rate = mdt_rejection_input/100
 g.target_mdt_wait = mdt_target_input
 g.mdt_resource = mdt_resource_input
+g.staff_weeks_lost = weeks_lost_input
 
 g.asst_rejection_rate = asst_rejection_input/100
 g.target_asst_wait = asst_target_input
