@@ -440,6 +440,55 @@ class Model:
 
         yield(self.env.timeout(1))
 
+    def prefill_waiting_lists(self):
+
+        if g.prefill == True:
+
+            if g.debug_level >= 2:
+                print(f'Filling Triage Waiting list with {g.triage_waiting_list+g.triage_resource} patients')
+            
+            # prefill triage waiting list and resources using value from g class
+            for a in range(g.triage_waiting_list+g.triage_resource):
+
+                # Increment patient counter by 1
+                self.patient_counter += 1
+                #self.active_entities += 1
+
+                p = Patient(self.patient_counter)
+
+                p.triage_wl_added = True
+                p.triage_already_seen = False
+
+                self.week_number = 0
+
+                self.env.process(self.pathway_start_point(p, self.week_number))
+        
+        else: 
+            yield self.env.timeout(0)
+             
+        if g.prefill == True:
+                
+                if g.debug_level >= 2:
+                    print(f'Filling Assessment Waiting list with {g.asst_waiting_list+g.asst_resource} patients')
+
+                # prefill triage waiting list and resources using value from g class
+                for b in range(g.asst_waiting_list+g.asst_resource):
+
+                    # Increment patient counter by 1
+                    self.patient_counter += 1
+                    #self.active_entities += 1
+
+                    p = Patient(self.patient_counter)
+
+                    p.asst_wl_added = True
+                    p.asst_already_seen = False
+
+                    self.week_number = 0
+
+                    self.env.process(self.pathway_start_point(p, self.week_number))
+                
+        yield self.env.timeout(0)
+
     # generator function that represents the DES generator for patients
     def patient_pathway(self, week_number):
 
