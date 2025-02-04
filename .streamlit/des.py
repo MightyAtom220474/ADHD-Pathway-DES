@@ -48,6 +48,7 @@ with st.sidebar:
         triage_resource_input =  st.slider("Number of Triage Slots per WTE", 0, 25, 8)
         triage_clin_time_input =  st.slider("Avg Clinical Time per Triage (mins)", 20, 60, 48)
         triage_admin_time_input =  st.slider("Avg Admin Time per Triage (mins)", 20, 60, 48)
+        triage_wl_input = st.number_input("Current Number on Triage Waiting List",min_value=0, max_value=5000, value=0)
 
     with st.expander("Pack & Observations"):
 
@@ -86,6 +87,7 @@ with st.sidebar:
         asst_resource_input =  st.slider("Number of Assessment Slots per WTE", 0, 25, 3)
         asst_clin_time_input =  st.slider("Avg Clinical Time per Asst (mins)", 60, 120, 90)
         asst_admin_time_input =  st.slider("Avg Admin Time per Asst (mins)", 60, 120, 90)
+        asst_wl_input = st.number_input("Current Number on Assessment Waiting List",min_value=0, max_value=5000, value=0)
 
     with st.expander("Job Plans"):
    
@@ -145,6 +147,11 @@ total_b4_prac_hours = b4_prac_avail_input*b4_prac_hours_input
 
 g.sim_duration = sim_duration_input
 g.number_of_runs = number_of_runs_input
+# determines whether the process to prefill the waiting lists runs or not
+if asst_wl_input + triage_wl_input == 0:
+    g.prefill = True
+else:
+    g.prefill = False
 
 ###########################################################
 # Run a trial using the parameters from the g class and   #
