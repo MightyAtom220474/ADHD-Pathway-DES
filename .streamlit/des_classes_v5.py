@@ -491,6 +491,21 @@ class Model:
                 
         yield self.env.timeout(0)
 
+    # function to decide where patients start on the pathway
+    def pathway_start_point(self,patient,week_number):
+        
+        p = patient
+
+        self.week_number = week_number
+       
+        if p.triage_already_seen == False:
+
+            yield self.env.process(self.triage_pathway(p,week_number))  
+
+        else:
+
+            yield self.env.process(self.asst_pathway(p,week_number))  
+
     # generator function that represents the referral part of the pathway
     def referral_pathway(self, patient, week_number):
 
