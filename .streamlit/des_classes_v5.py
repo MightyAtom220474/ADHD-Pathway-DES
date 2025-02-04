@@ -20,7 +20,7 @@ import pandas as pd
 # inside.
 class g:
 
-    debug_level = 0
+    debug_level = 1
 
     # Referrals
     mean_referrals_pw = 60
@@ -168,8 +168,8 @@ class Model:
         # Referral
         self.results_df['Week Number'] = [0]
         self.results_df['Run Number'] = [0]
-        self.results_df['Referral Time Screen'] = [0]
-        self.results_df['Referral Rejected'] = [0.0]
+        self.results_df['Referral Time Screen'] = [0.0]
+        self.results_df['Referral Rejected'] = [0]
         # Triage
         self.results_df['Q Time Triage'] = [0.0]
         self.results_df['Time to Triage'] = [0.0]
@@ -872,10 +872,10 @@ class Trial:
         # Once the trial (i.e. all runs) has completed, print the final results
         return self.df_trial_results, pd.concat(self.weekly_wl_dfs)
     
-# my_trial = Trial()
-# pd.set_option('display.max_rows', 1000)
-# # Call the run_trial method of our Trial class object
+my_trial = Trial()
+pd.set_option('display.max_rows', 1000)
+# Call the run_trial method of our Trial class object
 
-# df_trial_results, df_weekly_stats = my_trial.run_trial()
+df_trial_results, df_weekly_stats = my_trial.run_trial()
 
-# df_trial_results, df_weekly_stats
+df_trial_results, df_weekly_stats
