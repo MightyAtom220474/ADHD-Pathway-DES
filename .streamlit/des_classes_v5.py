@@ -60,7 +60,7 @@ class g:
 
     # Assessment
     target_asst_wait = 4 # assess within 4 weeks
-    asst_waiting_list = 2741 # current number of patients on waiting list for asst
+    asst_waiting_list = 1176 # current number of patients on waiting list for asst
     asst_resource = 62 # number of assessment slots p/w @ 60 mins
     asst_clin_time = 90 # number of mins for clinician to do asst
     asst_admin_time = 90 # number of mins of admin following asst
@@ -81,10 +81,10 @@ class g:
     asst_resource = int(62*weeks_lost_pc) # number of assessment slots p/w @ 60 mins
     
     # Simulation
-    sim_duration = 52
-    number_of_runs = 10
+    sim_duration = 156
+    number_of_runs = 1
     std_dev = 3 # used for randomising activity times
-    prefill = True
+    prefill = False
 
     # Result storage
     all_results = []
@@ -252,9 +252,12 @@ class Model:
                 p.triage_wl_added = True
                 p.triage_already_seen = False
 
-                self.week_number = -999
+                self.week_number = 0
 
                 self.env.process(self.pathway_start_point(p, self.week_number))
+        
+        else: 
+            yield self.env.timeout(0)
              
         if g.prefill == True:
                 
@@ -266,16 +269,18 @@ class Model:
 
                     # Increment patient counter by 1
                     self.patient_counter += 1
-                    self.active_entities += 1
+                    #self.active_entities += 1
 
                     p = Patient(self.patient_counter)
 
                     p.asst_wl_added = True
                     p.asst_already_seen = False
 
-                    self.week_number = -999
+                    self.week_number = 0
 
                     self.env.process(self.pathway_start_point(p, self.week_number))
+                
+        yield self.env.timeout(0)
 
     def pathway_start_point(self,patient,week_number):
         
@@ -285,11 +290,11 @@ class Model:
        
         if p.triage_already_seen == False:
 
-            self.env.process(self.triage_pathway(p,week_number))  
+            yield self.env.process(self.triage_pathway(p,week_number))  
 
         else:
 
-            self.env.process(self.asst_pathway(p,week_number))  
+            yield self.env.process(self.asst_pathway(p,week_number))  
 
     def week_runner(self,number_of_weeks):
 
@@ -318,7 +323,9 @@ class Model:
             capacity=g.asst_resource,
             init=g.asst_resource
             )
-
+        
+        # Start up the waiting list generator if required
+        yield self.env.process(self.prefill_waiting_lists())
 
         while self.week_number <= number_of_weeks:
             if g.debug_level >= 1:
@@ -331,7 +338,7 @@ class Model:
                     )
             
             # Start up the referral generator function
-            self.env.process(self.generator_patient_referrals())
+            yield self.env.process(self.generator_patient_referrals())
 
             self.referral_tot_screen = self.results_df['Referral Time Screen'
                                                                         ].sum()
@@ -500,7 +507,7 @@ class Model:
             p = Patient(self.patient_counter)
 
             # start up the patient pathway generator
-            self.env.process(self.pathway_start_point(p, self.week_number))
+            yield self.env.process(self.pathway_start_point(p, self.week_number))
 
         # reset the referral counter
         self.referral_counter = 0
@@ -528,11 +535,6 @@ class Model:
         # decide whether the assessment was rejected
         self.reject_asst = random.uniform(0,1)
 
-        # Increment the patient counter by 1
-        self.patient_counter += 1
-
-        # Create a new patient from Patient Class
-        p = Patient(self.patient_counter)
         p.week_added = week_number
 
         self.results_df.at[p.id, 'Referral Time Screen'] = self.random_normal(g.referral_screen_time,g.std_dev)
@@ -565,8 +567,13 @@ class Model:
             # add referral to triage waiting list as has passed referral
             g.number_on_triage_wl += 1
 
+            if p.triage_wl_added == True:
+                self.patient_source = 'Waiting List'
+            else:
+                self.patient_source = 'Referral Gen'
+
             if g.debug_level >= 2:
-                print(f'Patient {p.id} added in week {p.week_added}, current triage wl:{g.number_on_triage_wl}')
+                print(f'Patient {p.id} added in week {p.week_added} from {self.patient_source}, current triage wl:{g.number_on_triage_wl}')
 
             ##### Now do the Triage #####
 
@@ -579,7 +586,6 @@ class Model:
             # Request a Triage resource from the container
             with self.triage_res.get(1) as triage_req:
                 yield triage_req
-
                 
                 # as each patient reaches this stage take them off Triage wl
                 g.number_on_triage_wl -= 1
@@ -798,8 +804,13 @@ class Model:
             # take patient off the Asst waiting list once Asst starts
             g.number_on_asst_wl -= 1
 
+            if p.asst_wl_added == True:
+                self.patient_source = 'Waiting List'
+            else:
+                self.patient_source = 'Referral Gen'
+
             if g.debug_level >= 2:
-                print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) put through assessment')
+                print(f'Patient {p.id} added in week {p.week_added} from {self.patient_source}, current asst wl:{g.number_on_triage_wl}')
 
             end_q_asst = self.env.now
 
@@ -864,9 +875,6 @@ class Model:
     # and in turns calls anything we need to generate results for the run
     def run(self, print_run_results=True):
 
-        # Start up the waiting list generator if required
-        yield self.env.process(self.prefill_waiting_lists())
-        
         # Start up the referral generator to create new referrals
         self.env.process(self.week_runner(g.sim_duration))
 
@@ -875,7 +883,7 @@ class Model:
 
         # Now the simulation run has finished, call the method that calculates
         # run results
-        self.env.process(self.calculate_run_results())
+        self.calculate_run_results()
 
         # Print the run number with the patient-level results from this run of
         # the model
