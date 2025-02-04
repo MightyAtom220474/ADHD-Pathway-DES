@@ -115,6 +115,8 @@ class Patient:
         self.place_on_triage_wl = 0 # position they are on Triage waiting list
         self.triage_rejected = 0 # were they rejected following triage
         self.triage_time_disch = 0 # time take if rejected at this stage
+        self.triage_wl_added = False # were they added from the backlog, default is false
+        self.triage_already_seen = False # has the patient already had their triage, default is false
 
         # School/Home Assesment Pack
         self.pack_rejected = 0 # rejected as school pack not returned
@@ -489,361 +491,356 @@ class Model:
                 
         yield self.env.timeout(0)
 
-    # generator function that represents the DES generator for patients
-    def patient_pathway(self, week_number):
+    # generator function that represents the referral part of the pathway
+    def referral_pathway(self, patient, week_number):
 
-            # decide whether the patient was rejected at any point
-            # decide whether the referral was rejected
-            self.reject_referral = random.uniform(0,1)
-            # decide whether the triage was rejected
-            self.reject_triage = random.uniform(0,1)
-            # decide whether the pack was returned on time or not
-            self.reject_pack = random.uniform(0,1)
-            # decide whether the obs were completed on time or not
-            self.reject_obs = random.uniform(0,1)
-            # decide whether the mdt was rejected
-            self.reject_mdt = random.uniform(0,1)
-            # decide whether the assessment was rejected
-            self.reject_asst = random.uniform(0,1)
+        p = patient
 
-            # Increment the patient counter by 1
-            self.patient_counter += 1
+        self.week_number = week_number
 
-            # Create a new patient from Patient Class
-            p = Patient(self.patient_counter)
-            p.week_added = week_number
+        # decide whether the patient was rejected at any point
+        # decide whether the referral was rejected
+        self.reject_referral = random.uniform(0,1)
+        # decide whether the triage was rejected
+        self.reject_triage = random.uniform(0,1)
+        # decide whether the pack was returned on time or not
+        self.reject_pack = random.uniform(0,1)
+        # decide whether the obs were completed on time or not
+        self.reject_obs = random.uniform(0,1)
+        # decide whether the mdt was rejected
+        self.reject_mdt = random.uniform(0,1)
+        # decide whether the assessment was rejected
+        self.reject_asst = random.uniform(0,1)
 
-            self.results_df.at[p.id, 'Referral Time Screen'] = self.random_normal(g.referral_screen_time,g.std_dev)
+        p.week_added = week_number
 
-            if g.debug_level >= 1:
-                print(f'Week {week_number} Patient number {p.id} created')
+        self.results_df.at[p.id, 'Referral Time Screen'] = self.random_normal(g.referral_screen_time,g.std_dev)
 
-            # check whether the referral was rejected or not
-            if self.reject_referral <= g.referral_rejection_rate:
+        # check whether the referral was rejected or not
+        if self.reject_referral <= g.referral_rejection_rate:
 
-                # if this referral is rejected mark as rejected
-                self.results_df.at[p.id, 'Run Number'] = self.run_number
+            # if this referral is rejected mark as rejected
+            self.results_df.at[p.id, 'Run Number'] = self.run_number
 
-                self.results_df.at[p.id, 'Week Number'] = self.week_number
+            self.results_df.at[p.id, 'Week Number'] = self.week_number
 
-                self.results_df.at[p.id, 'Referral Rejected'] = 1
+            self.results_df.at[p.id, 'Referral Rejected'] = 1
 
-                self.reject_triage = g.triage_rejection_rate
+            
+            self.reject_triage = g.triage_rejection_rate
+            self.reject_pack = g.pack_rejection_rate
+            self.reject_obs = g.obs_rejection_rate
+            self.reject_mdt = g.mdt_rejection_rate
+            self.reject_asst = g.asst_rejection_rate
+
+        else:
+            # Mark referral as accepted and move on to Triage
+            self.results_df.at[p.id, 'Referral Rejected'] = 0
+
+            self.results_df.at[p.id, 'Run Number'] = self.run_number
+
+            self.results_df.at[p.id, 'Week Number'] = self.week_number
+
+            ##### Now do the Triage #####
+            # start up the triage patient pathway generator
+            self.env.process(self.pack_pathway(p))
+
+    def triage_pathway(self, patient):
+
+        p = patient
+
+        # add referral to triage waiting list as has passed referral
+        g.number_on_triage_wl += 1
+
+        if p.triage_wl_added == True:
+            self.patient_source = 'Waiting List'
+        else:
+            self.patient_source = 'Referral Gen'
+
+        if g.debug_level >= 2:
+            print(f'Patient {p.id} added in week {p.week_added} from {self.patient_source}, current triage wl:{g.number_on_triage_wl}')
+
+        ##### Now do the Triage #####
+
+        start_q_triage = self.env.now
+
+        # Record where the patient is on the Triage WL
+        self.results_df.at[p.id, "Triage WL Posn"] = \
+                                            g.number_on_triage_wl
+
+        # Request a Triage resource from the container
+        with self.triage_res.get(1) as triage_req:
+            yield triage_req
+            
+            # as each patient reaches this stage take them off Triage wl
+            g.number_on_triage_wl -= 1
+
+            if g.debug_level >= 2:
+                print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) put through triage')
+
+            end_q_triage = self.env.now
+            # pick a random time from 1-4 for how long it took to Triage
+            sampled_triage_time = round(random.uniform(0, 4), 1)
+
+            # Calculate how long it took the patient to be Triaged
+            self.q_time_triage = end_q_triage - start_q_triage
+
+            # Record how long the patient waited to be Triaged
+            self.results_df.at[p.id, 'Q Time Triage'] = \
+                                                    (self.q_time_triage)
+            # Record how long the patient took to be Triaged
+            self.results_df.at[p.id, 'Time to Triage'] = \
+                                            sampled_triage_time
+            self.results_df.at[p.id,'Triage Mins Clin'] = \
+                                            self.random_normal(
+                                            g.triage_clin_time,g.std_dev)
+            self.results_df.at[p.id,'Triage Mins Admin'] = \
+                                        self.random_normal(
+                                        g.triage_admin_time,g.std_dev)
+
+            # Record total time it took to triage patient
+            self.results_df.at[p.id, 'Total Triage Time'] = \
+                                                    (sampled_triage_time
+                                                    +(end_q_triage -
+                                                    start_q_triage))
+
+            # Determine whether patient was rejected following triage
+            if self.reject_triage <= g.triage_rejection_rate:
+
+                self.results_df.at[p.id, 'Triage Rejected'] = 1
+                
+                self.results_df.at[p.id, 'Triage Time Reject'] = \
+                    self.random_normal(g.triage_discharge_time,g.std_dev)
+
+                #reject all the other parts of the pathway if triage rejected
+                # SR Comment - see above ref setting of these patient attributes
                 self.reject_pack = g.pack_rejection_rate
                 self.reject_obs = g.obs_rejection_rate
                 self.reject_mdt = g.mdt_rejection_rate
                 self.reject_asst = g.asst_rejection_rate
 
-                if g.debug_level >= 1:
-                    print(f'Week {week_number} Patient number {p.id} referral rejected')
+                yield self.env.timeout(sampled_triage_time)
+            else:
+                # record that the Triage was accepted
+                self.results_df.at[p.id, 'Triage Rejected'] = 0
+
+                yield self.env.timeout(sampled_triage_time)
+
+                ##### Now send out the Pack #####
+                # start up the pack patient pathway generator
+                self.env.process(self.pack_pathway(p))
+
+    def pack_pathway(self, patient):
+        
+        p = patient
+
+        self.results_df.at[p.id, 'Time Pack Send'] = self.random_normal(\
+                                            g.pack_admin_time,g.std_dev)
+
+        # determine whether the pack was returned on time or not
+        if self.reject_pack < g.pack_rejection_rate:
+        #print(f'Patient {p} pack sent out')
+            self.sampled_pack_time = round(random.uniform(3,5),1) # came back late
+            self.results_df.at[p.id, 'Return Time Pack'] = \
+                                                    self.sampled_pack_time
+            # Mark that the pack was returned on time
+            self.results_df.at[p.id, 'Pack Rejected'] = 1
+            self.results_df.at[p.id, 'Time Pack Reject'] = self.random_normal(\
+                                                g.pack_reject_time,g.std_dev)
+            #reject all the other parts of the pathway if pack rejected
+            self.reject_obs = g.obs_rejection_rate
+            self.reject_mdt = g.mdt_rejection_rate
+            self.reject_asst = g.asst_rejection_rate
+        else:
+            
+            # pick a random time for how long it took for Pack to be returned
+            self.sampled_pack_time = round(random.uniform(0, 3), 1) # came back in time
+
+            # Record how long the pack took to be returned
+            self.results_df.at[p.id, 'Return Time Pack'] = \
+                                                    self.sampled_pack_time
+            # Mark that the pack was returned on time
+            self.results_df.at[p.id, 'Pack Rejected'] = 0
+
+            ##### Now do the Observations #####
+            # start up the mdt patient pathway generator
+            yield self.env.process(self.obs_pathway(p))
+
+    def obs_pathway(self, patient):
+        
+        p = patient
+
+        self.results_df.at[p.id, 'Time Obs Visit'] = self.random_normal(\
+                                                    g.school_obs_time,g.std_dev)
+
+        # determine whether the obs were returned on time or not
+        if self.reject_obs < g.obs_rejection_rate:
+        #print(f'Patient {p} obs started')
+            # mark that the pack was returned late
+            self.results_df.at[p.id, 'Obs Rejected'] = 1
+            # record a return time that is after the target
+            self.sampled_obs_time = round(random.uniform(4, 6), 1)
+            # Record how long the patient took for Obs
+            self.results_df.at[p.id, 'Return Time Obs'] = \
+                                                        self.sampled_obs_time
+            self.results_df.at[p.id, 'Time Obs Reject'] = self.random_normal(\
+                                                    g.obs_reject_time,g.std_dev)
+
+            #reject all the other parts of the pathway if obs rejected
+            self.reject_mdt = g.mdt_rejection_rate
+            self.reject_asst = g.asst_rejection_rate
+
+        else:
+            # pick a random time for how long it took for Obs to be returned
+            self.sampled_obs_time = round(random.uniform(0, 4), 1)
+
+            # Record how long the patient took for Obs
+            self.results_df.at[p.id, 'Return Time Obs'] = \
+                                                        self.sampled_obs_time
+
+            # Mark that the pack was returned on time
+            self.results_df.at[p.id, 'Obs Rejected'] = 0
+            #print(f'Patient {p} obs completed')
+
+            ##### Now do the MDT #####
+            # start up the mdt patient pathway generator
+            yield self.env.process(self.mdt_pathway(p))
+
+    def mdt_pathway(self, patient):
+        
+        p = patient
+        #print(f'Patient {p} MDT started')
+        start_q_mdt = self.env.now
+
+        self.results_df.at[p.id, 'Time Prep MDT'] = self.random_normal(g.mdt_prep_time,g.std_dev)
+        self.results_df.at[p.id, 'Time Meet MDT'] = self.random_normal(g.mdt_meet_time,g.std_dev)
+        # add referral to MDT waiting list as has passed obs
+        g.number_on_mdt_wl += 1
+
+        # Record where they patient is on the MDT WL
+        self.results_df.at[p.id, "MDT WL Posn"] = \
+                                            g.number_on_mdt_wl
+        # Wait until an MDT resource becomes available
+        with self.mdt_res.get(1) as mdt_req: # request an MDT resource
+            yield mdt_req
+
+            #print(f'Resource in use: {mdt_req}')
+            # take patient off the MDT waiting list once MDT has taken place
+            g.number_on_mdt_wl -= 1
+
+            if g.debug_level >= 2:
+                print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) put through mdt')
+
+            end_q_mdt = self.env.now
+            # pick a random time from 0-1 weeks for how long it took for MDT
+            sampled_mdt_time = round(random.uniform(0,1),1)
+
+            # Calculate how long the patient waited to have MDT
+            self.q_time_mdt = end_q_mdt - start_q_mdt
+
+            # Record how long the patient waited for MDT
+            self.results_df.at[p.id, 'Q Time MDT'] = (self.q_time_mdt)
+            # Record how long the patient took to be MDT'd
+            self.results_df.at[p.id, 'Time to MDT'] = sampled_mdt_time
+            # Record total time it took to MDT patient
+            self.results_df.at[p.id, 'Total MDT Time'] = (sampled_mdt_time
+                                                        +(end_q_mdt -
+                                                        start_q_mdt))
+            if self.reject_mdt <= g.mdt_rejection_rate:
+                self.results_df.at[p.id, 'MDT Rejected'] = 1
+
+                self.results_df.at[p.id, 'MDT Time Reject'] = self.random_normal(g.mdt_reject_time,g.std_dev)
+                #reject all the other parts of the pathway if mdt rejected
+                self.reject_asst = g.asst_rejection_rate
+
+                # release the MDT resource
+                yield self.env.timeout(sampled_mdt_time)
+            else:
+                self.results_df.at[p.id, 'MDT Rejected'] = 0
+                # release the MDT resource
+                yield self.env.timeout(sampled_mdt_time)
+
+            #print(f'Patient {p} MDT completed')
+
+                ##### Now do the Assessment #####
+                # start up the asst patient pathway generator
+                yield self.env.process(self.asst_pathway(p,self.week_number))
+    
+    def asst_pathway(self, patient, week_number):
+        
+        p = patient
+
+        self.week_number = week_number
+
+        #print(f'Patient {p} assessment started')
+        start_q_asst = self.env.now
+
+        # add referral to asst waiting list as has passed mdt
+        g.number_on_asst_wl += 1
+
+        # Record where they patient is on the MDT WL
+        self.results_df.at[p.id, "Asst WL Posn"] = \
+                                                    g.number_on_asst_wl
+        # Wait until an Assessment resource becomes available
+        with self.asst_res.get(1) as asst_req:
+            yield asst_req
+
+            #print(f'Resource in use: {asst_req}')
+            # take patient off the Asst waiting list once Asst starts
+            g.number_on_asst_wl -= 1
+
+            if p.asst_wl_added == True:
+                self.patient_source = 'Waiting List'
+            else:
+                self.patient_source = 'Referral Gen'
+
+            if g.debug_level >= 2:
+                print(f'Patient {p.id} added in week {p.week_added} from {self.patient_source}, current asst wl:{g.number_on_triage_wl}')
+
+            end_q_asst = self.env.now
+
+            # pick a random time from 1-4 for how long it took to Assess
+            sampled_asst_time = round(random.uniform(0,4),1)
+
+            # Calculate how long it took the patient to be Assessed
+            self.q_time_asst = end_q_asst - start_q_asst
+
+            # Record how long the patient waited to be Assessed
+            self.results_df.at[p.id, 'Q Time Asst'] = \
+                                                        (self.q_time_asst)
+            # Record how long the patient took to be Triage
+            self.results_df.at[p.id, 'Time to Asst'] = \
+                    sampled_asst_time
+            self.results_df.at[p.id,'Asst Mins Clin'] = \
+                    self.random_normal(g.asst_clin_time,g.std_dev)
+            self.results_df.at[p.id,'Asst Mins Admin'] = \
+                    self.random_normal(g.asst_admin_time,g.std_dev)
+            # Record total time it took to triage patient
+            self.results_df.at[p.id, 'Total Asst Time'] = \
+                                                        (sampled_asst_time
+                                                        +(end_q_asst -
+                                                        start_q_asst))
+
+            # Determine whether patient was rejected following assessment
+            if self.reject_asst <= g.asst_rejection_rate:
+
+                self.results_df.at[p.id, 'Asst Rejected'] = 1
+                self.results_df.at[p.id,'Diag Rejected Time'] = self.random_normal(g.diag_time_disch,g.std_dev)
+                # release the resource once the Assessment is completed
+                yield self.env.timeout(sampled_asst_time)
 
             else:
-                # Mark referral as accepted and move on to Triage
-                self.results_df.at[p.id, 'Referral Rejected'] = 0
-
-                self.results_df.at[p.id, 'Run Number'] = self.run_number
-
-                self.results_df.at[p.id, 'Week Number'] = self.week_number
-
-                if g.debug_level >= 1:
-                    print(f'Week {week_number} Patient number {p.id} referral accepted')
-
-                # add referral to triage waiting list as has passed referral
-                g.number_on_triage_wl += 1
-
-                if g.debug_level >= 2:
-                    print(f'Patient {p.id} added in week {p.week_added}, current triage wl:{g.number_on_triage_wl}')
-
-                ##### Now do the Triage #####
-
-                start_q_triage = self.env.now
-
-                # Record where the patient is on the Triage WL
-                self.results_df.at[p.id, "Triage WL Posn"] = \
-                                                    g.number_on_triage_wl
-
-                # Request a Triage resource from the container
-                with self.triage_res.get(1) as triage_req:
-                    yield triage_req
-
-                    if g.debug_level >= 1:
-                        print(f'Week {week_number} Patient number {p.id} started triage')
-
-                    # as each patient reaches this stage take them off Triage wl
-                    g.number_on_triage_wl -= 1
-
-                    end_q_triage = self.env.now
-                    # pick a random time from 1-4 for how long it took to Triage
-                    sampled_triage_time = round(random.uniform(0, 4), 1)
-
-                    # Calculate how long it took the patient to be Triaged
-                    self.q_time_triage = end_q_triage - start_q_triage
-
-                    # Record how long the patient waited to be Triaged
-                    self.results_df.at[p.id, 'Q Time Triage'] = \
-                                                            (self.q_time_triage)
-                    # Record how long the patient took to be Triaged
-                    self.results_df.at[p.id, 'Time to Triage'] = \
-                                                    sampled_triage_time
-                    self.results_df.at[p.id,'Triage Mins Clin'] = \
-                                                    self.random_normal(g.triage_clin_time,g.std_dev)
-                    self.results_df.at[p.id,'Triage Mins Admin'] = \
-                                                    self.random_normal(g.triage_admin_time,g.std_dev)
-
-                    # Record total time it took to triage patient
-                    self.results_df.at[p.id, 'Total Triage Time'] = \
-                                                            (sampled_triage_time
-                                                            +(end_q_triage -
-                                                            start_q_triage))
-
-                    #print(f'Patient number {self.patient_counter} triaged')
-
-                    # Determine whether patient was rejected following triage
-                    if self.reject_triage <= g.triage_rejection_rate:
-
-                        self.results_df.at[p.id, 'Triage Rejected'] = 1
-                        
-                        self.results_df.at[p.id, 'Triage Time Reject'] = self.random_normal(g.triage_discharge_time,g.std_dev)
-
-                        #reject all the other parts of the pathway if triage rejected
-                        # SR Comment - see above ref setting of these patient attributes
-                        self.reject_pack = g.pack_rejection_rate
-                        self.reject_obs = g.obs_rejection_rate
-                        self.reject_mdt = g.mdt_rejection_rate
-                        self.reject_asst = g.asst_rejection_rate
-
-                        if g.debug_level >= 1:
-                            print(f'Week {week_number} Patient number {p.id} rejected at triage')
-
-                        yield self.env.timeout(sampled_triage_time)
-                    else:
-                        # record that the Triage was accepted
-                        self.results_df.at[p.id, 'Triage Rejected'] = 0
-
-                        if g.debug_level >= 1:
-                            print(f'Week {week_number} Patient number {p.id} accepted at triage')
-
-                        yield self.env.timeout(sampled_triage_time)
-
-                        ##### Now send out the Pack #####
-
-                        if g.debug_level >= 1:
-                            print(f'Week {week_number} Patient number {p.id} pack sent out')
-
-                        self.results_df.at[p.id, 'Time Pack Send'] = self.random_normal(g.pack_admin_time,g.std_dev)
-
-                        # determine whether the pack was returned on time or not
-                        if self.reject_pack < g.pack_rejection_rate:
-                        #print(f'Patient {p} pack sent out')
-                            self.sampled_pack_time = round(random.uniform(3,5),1) # came back late
-                            self.results_df.at[p.id, 'Return Time Pack'] = \
-                                                                    self.sampled_pack_time
-                            # Mark that the pack was returned on time
-                            self.results_df.at[p.id, 'Pack Rejected'] = 1
-                            self.results_df.at[p.id, 'Time Pack Reject'] = self.random_normal(g.pack_reject_time,g.std_dev)
-                            #reject all the other parts of the pathway if pack rejected
-                            self.reject_obs = g.obs_rejection_rate
-                            self.reject_mdt = g.mdt_rejection_rate
-                            self.reject_asst = g.asst_rejection_rate
-
-                            if g.debug_level >= 1:
-                                print(f'Week {week_number} Patient number {p.id} pack not returned')
-                        else:
-                            #print(f'Patient {p} pack returned')
-                            # pick a random time for how long it took for Pack to be returned
-                            self.sampled_pack_time = round(random.uniform(0, 3), 1) # came back in time
-
-                            # Record how long the pack took to be returned
-                            self.results_df.at[p.id, 'Return Time Pack'] = \
-                                                                    self.sampled_pack_time
-                            # Mark that the pack was returned on time
-                            self.results_df.at[p.id, 'Pack Rejected'] = 0
-
-                            if g.debug_level >= 1:
-                                print(f'Week {week_number} Patient number {p.id} pack returned on time')
-
-                            ##### Now do the Observations #####
-
-                            self.results_df.at[p.id, 'Time Obs Visit'] = self.random_normal(g.school_obs_time,g.std_dev)
-
-                            if g.debug_level >= 1:
-                                print(f'Week {week_number} Patient number {p.id} started obs')
-
-                            # determine whether the obs were returned on time or not
-                            if self.reject_obs < g.obs_rejection_rate:
-                            #print(f'Patient {p} obs started')
-                                # mark that the pack was returned late
-                                self.results_df.at[p.id, 'Obs Rejected'] = 1
-                                # record a return time that is after the target
-                                self.sampled_obs_time = round(random.uniform(4, 6), 1)
-                                # Record how long the patient took for Obs
-                                self.results_df.at[p.id, 'Return Time Obs'] = \
-                                                                            self.sampled_obs_time
-                                self.results_df.at[p.id, 'Time Obs Reject'] = self.random_normal(g.obs_reject_time,g.std_dev)
-
-                                if g.debug_level >= 1:
-                                    print(f'Week {week_number} Patient number {p.id} rejected at obs')
-                                
-                                #reject all the other parts of the pathway if obs rejected
-                                self.reject_mdt = g.mdt_rejection_rate
-                                self.reject_asst = g.asst_rejection_rate
-
-                            else:
-                                # pick a random time for how long it took for Obs to be returned
-                                self.sampled_obs_time = round(random.uniform(0, 4), 1)
-
-                                # Record how long the patient took for Obs
-                                self.results_df.at[p.id, 'Return Time Obs'] = \
-                                                                            self.sampled_obs_time
-
-                                # Mark that the pack was returned on time
-                                self.results_df.at[p.id, 'Obs Rejected'] = 0
-                                #print(f'Patient {p} obs completed')
-                                
-                                if g.debug_level >= 1:
-                                    print(f'Week {week_number} Patient number {p.id} accepted at obs')
-
-                                ##### Now do the MDT #####
-
-                                #print(f'Patient {p} MDT started')
-                                start_q_mdt = self.env.now
-
-                                self.results_df.at[p.id, 'Time Prep MDT'] = self.random_normal(g.mdt_prep_time,g.std_dev)
-                                self.results_df.at[p.id, 'Time Meet MDT'] = self.random_normal(g.mdt_meet_time,g.std_dev)
-                                # add referral to MDT waiting list as has passed obs
-                                g.number_on_mdt_wl += 1
-
-                                # Record where they patient is on the MDT WL
-                                self.results_df.at[p.id, "MDT WL Posn"] = \
-                                                                    g.number_on_mdt_wl
-                                # Wait until an MDT resource becomes available
-                                with self.mdt_res.get(1) as mdt_req: # request an MDT resource
-                                    yield mdt_req
-
-                                    if g.debug_level >= 1:
-                                        print(f'Week {week_number} Patient number {p.id} started mdt')
-
-                                    #print(f'Resource in use: {mdt_req}')
-                                    # take patient off the MDT waiting list once MDT has taken place
-                                    g.number_on_mdt_wl -= 1
-
-                                    if g.debug_level >= 2:
-                                        print(f'Week {self.env.now}: Patient number {p.id}  (added week {p.week_added}) put through mdt')
-
-                                    end_q_mdt = self.env.now
-                                    # pick a random time from 0-1 weeks for how long it took for MDT
-                                    sampled_mdt_time = round(random.uniform(0,1),1)
-
-                                    # Calculate how long the patient waited to have MDT
-                                    self.q_time_mdt = end_q_mdt - start_q_mdt
-
-                                    # Record how long the patient waited for MDT
-                                    self.results_df.at[p.id, 'Q Time MDT'] = (self.q_time_mdt)
-                                    # Record how long the patient took to be MDT'd
-                                    self.results_df.at[p.id, 'Time to MDT'] = sampled_mdt_time
-                                    # Record total time it took to MDT patient
-                                    self.results_df.at[p.id, 'Total MDT Time'] = \
-                                                                                 (sampled_mdt_time
-                                                                                +(end_q_mdt -
-                                                                                start_q_mdt))
-                                    if self.reject_mdt <= g.mdt_rejection_rate:
-                                        self.results_df.at[p.id, 'MDT Rejected'] = 1
-
-                                        self.results_df.at[p.id, 'MDT Time Reject'] = self.random_normal(g.mdt_reject_time,g.std_dev)
-                                        #reject all the other parts of the pathway if mdt rejected
-                                        self.reject_asst = g.asst_rejection_rate
-
-                                        if g.debug_level >= 1:
-                                            print(f'Week {week_number} Patient number {p.id} rejected at mdt')
-
-                                        # release the MDT resource
-                                        yield self.env.timeout(sampled_mdt_time)
-                                    else:
-                                        self.results_df.at[p.id, 'MDT Rejected'] = 0
-
-                                        if g.debug_level >= 1:
-                                            print(f'Week {week_number} Patient number {p.id} accepted at mdt')
-                                        # release the MDT resource
-                                        yield self.env.timeout(sampled_mdt_time)
-
-                                    #print(f'Patient {p} MDT completed')
-
-                                        ##### Now do the Assessment #####
-
-                                        #print(f'Patient {p} assessment started')
-                                        start_q_asst = self.env.now
-
-                                        # add referral to asst waiting list as has passed mdt
-                                        g.number_on_asst_wl += 1
-
-                                        # Record where they patient is on the MDT WL
-                                        self.results_df.at[p.id, "Asst WL Posn"] = \
-                                                                                    g.number_on_asst_wl
-                                        # Wait until an Assessment resource becomes available
-                                        with self.asst_res.get(1) as asst_req:
-                                            yield asst_req
-
-                                            #print(f'Resource in use: {asst_req}')
-                                            # take patient off the Asst waiting list once Asst starts
-                                            g.number_on_asst_wl -= 1
-
-                                            if g.debug_level >= 1:
-                                                print(f'Week {week_number} Patient number {p.id} started asst')
-
-                                            if g.debug_level >= 2:
-                                                print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) put through assessment')
-
-                                            end_q_asst = self.env.now
-
-                                            # pick a random time from 1-4 for how long it took to Assess
-                                            sampled_asst_time = round(random.uniform(0,4),1)
-
-                                            # Calculate how long it took the patient to be Assessed
-                                            self.q_time_asst = end_q_asst - start_q_asst
-
-                                            # Record how long the patient waited to be Assessed
-                                            self.results_df.at[p.id, 'Q Time Asst'] = \
-                                                                                        (self.q_time_asst)
-                                            # Record how long the patient took to be Triage
-                                            self.results_df.at[p.id, 'Time to Asst'] = \
-                                                    sampled_asst_time
-                                            self.results_df.at[p.id,'Asst Mins Clin'] = \
-                                                    self.random_normal(g.asst_clin_time,g.std_dev)
-                                            self.results_df.at[p.id,'Asst Mins Admin'] = \
-                                                    self.random_normal(g.asst_admin_time,g.std_dev)
-                                            # Record total time it took to triage patient
-                                            self.results_df.at[p.id, 'Total Asst Time'] = \
-                                                                                        (sampled_asst_time
-                                                                                        +(end_q_asst -
-                                                                                        start_q_asst))
-
-                                            # Determine whether patient was rejected following assessment
-                                            if self.reject_asst <= g.asst_rejection_rate:
-
-                                                self.results_df.at[p.id, 'Asst Rejected'] = 1
-                                                self.results_df.at[p.id,'Diag Rejected Time'] = self.random_normal(g.diag_time_disch,g.std_dev)
-                                                if g.debug_level >= 1:
-                                                    print(f'Week {week_number} Patient number {p.id} rejected at asst')
-                                                
-                                                # release the resource once the Assessment is completed
-                                                yield self.env.timeout(sampled_asst_time)
-
-                                            else:
-                                                self.results_df.at[p.id, 'Asst Rejected'] = 0
-                                                self.results_df.at[p.id, 'Diag Accepted Time'] = self.random_normal(g.diag_time_accept,g.std_dev)
-                                                
-                                                if g.debug_level >= 1:
-                                                    print(f'Week {week_number} Patient number {p.id} accepted at asst')
-                                                
-                                                # release the resource once the Assessment is completed
-                                                yield self.env.timeout(sampled_asst_time)
+                self.results_df.at[p.id, 'Asst Rejected'] = 0
+                self.results_df.at[p.id, 'Diag Accepted Time'] = self.random_normal(g.diag_time_accept,g.std_dev)
+                # release the resource once the Assessment is completed
+                yield self.env.timeout(sampled_asst_time)
 
             yield self.env.timeout(0)
 
             # reset referral counter ready for next batch
             self.referral_counter = 0
 
-            return self.results_df
+            #return self.results_df
     
     # This method calculates results over each single run
     def calculate_run_results(self):
