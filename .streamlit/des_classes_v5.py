@@ -20,7 +20,7 @@ import pandas as pd
 # inside.
 class g:
 
-    debug_level = 0
+    debug_level = 2
 
     # Referrals
     mean_referrals_pw = 60
@@ -233,10 +233,13 @@ class Model:
             if activity_time > 0:
                 return activity_time
             
-    def prefill_waiting_lists(self,prefill):
+    def prefill_waiting_lists(self):
 
-        if prefill == True:
+        if g.prefill == True:
 
+            if g.debug_level >= 2:
+                print(f'Filling Triage Waiting list with {g.triage_waiting_list+g.triage_resource} patients')
+            
             # prefill triage waiting list and resources using value from g class
             for a in range(g.triage_waiting_list+g.triage_resource):
 
@@ -252,8 +255,11 @@ class Model:
                 self.week_number = -999
 
                 self.env.process(self.pathway_start_point(p, self.week_number))
-
-        if prefill == True:
+             
+        if g.prefill == True:
+                
+                if g.debug_level >= 2:
+                    print(f'Filling Assessment Waiting list with {g.asst_waiting_list+g.asst_resource} patients')
 
                 # prefill triage waiting list and resources using value from g class
                 for b in range(g.asst_waiting_list+g.asst_resource):
@@ -488,8 +494,13 @@ class Model:
             # increment the referral counter by 1
             self.referral_counter += 1
 
+            # Increment patient counter by 1
+            self.patient_counter += 1
+
+            p = Patient(self.patient_counter)
+
             # start up the patient pathway generator
-            self.env.process(self.pathway_start_point(self.week_number))
+            self.env.process(self.pathway_start_point(p, self.week_number))
 
         # reset the referral counter
         self.referral_counter = 0
@@ -833,17 +844,17 @@ class Model:
             # reset referral counter ready for next batch
             self.referral_counter = 0
 
-            return self.results_df
+            #return self.results_df
 
     # This method calculates results over each single run
     def calculate_run_results(self):
         # Take the mean of the queuing times and the maximum waiting lists
         self.mean_q_time_triage = self.results_df["Q Time Triage"].mean()
-        self.max_triage_wl = g.number_on_triage_wl
+        self.max_triage_wl = g.number_on_triage_wl#self.results_df["Triage WL Posn"].max()
         self.mean_q_time_mdt = self.results_df["Q Time MDT"].mean()
-        self.max_mdt_wl = g.number_on_mdt_wl 
+        self.max_mdt_wl = g.number_on_mdt_wl #self.results_df["MDT WL Posn"].max()
         self.mean_q_time_asst = self.results_df["Q Time Asst"].mean()
-        self.max_asst_wl = g.number_on_asst_wl
+        self.max_asst_wl = g.number_on_asst_wl#self.results_df["Asst WL Posn"].max()
         # reset waiting lists ready for next run
         g.number_on_triage_wl = 0
         g.number_on_mdt_wl = 0
@@ -853,10 +864,9 @@ class Model:
     # and in turns calls anything we need to generate results for the run
     def run(self, print_run_results=True):
 
-        if g.prefill == True:
-            # prefill the waiting lists
-            yield self.env.process(self.prefill_waiting_lists(g.prefill))
-
+        # Start up the waiting list generator if required
+        yield self.env.process(self.prefill_waiting_lists())
+        
         # Start up the referral generator to create new referrals
         self.env.process(self.week_runner(g.sim_duration))
 
@@ -865,7 +875,7 @@ class Model:
 
         # Now the simulation run has finished, call the method that calculates
         # run results
-        self.calculate_run_results()
+        self.env.process(self.calculate_run_results())
 
         # Print the run number with the patient-level results from this run of
         # the model
