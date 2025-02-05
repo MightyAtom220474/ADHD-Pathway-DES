@@ -117,6 +117,7 @@ class Patient:
         self.triage_time_disch = 0 # time take if rejected at this stage
         self.triage_wl_added = False # were they added from the backlog, default is false
         self.triage_already_seen = False # has the patient already had their triage, default is false
+        self.triage_patient_source = []
 
         # School/Home Assesment Pack
         self.pack_rejected = 0 # rejected as school pack not returned
@@ -142,6 +143,9 @@ class Patient:
         self.asst_time_admin = 0 # how long the asst took to write up in minutes
         self.place_on_asst_wl = 0 # position they are on assessment waiting list
         self.asst_rejected = 0 # were they rejected following assessment
+        self.asst_wl_added = False # were they added from the backlog, default is false
+        self.asst_already_seen = False # has the patient already had their asst, default is false
+        self.asst_patient_source = []
 
         # Diagnosis
         self.diagnosis_status = 0 # were they accepted or rejected
@@ -228,6 +232,14 @@ class Model:
             if activity_time > 0:
                 return activity_time
 
+    # this function governs the whole process and kicks off the waiting list builder
+    # and week runner, as and when required
+    def governor_function(self):
+
+        if g.prefill == True:
+            self.env.process(self.prefill_waiting_lists())
+        else:
+            self.env.process(self.week_runner())
     def week_runner(self,number_of_weeks):
 
         # week counter
@@ -434,8 +446,8 @@ class Model:
             # increment the referral counter by 1
             self.referral_counter += 1
 
-            # start up the patient pathway generator
-            self.env.process(self.patient_pathway(self.week_number))
+            # start up the patient pathway generator at the referral stage
+            self.env.process(self.referral_pathway(self.week_number))
 
         # reset the referral counter
         self.referral_counter = 0
@@ -443,73 +455,110 @@ class Model:
         yield(self.env.timeout(1))
 
     def prefill_waiting_lists(self):
+              
+        # first fill up the assessment waiting list
+        if g.debug_level >= 2:
+            print(f'Filling Assessment Waiting list with {g.asst_waiting_list+g.asst_resource} patients')
 
-        if g.prefill == True:
+        # prefill triage waiting list and resources using values from g class
+        for b in range(g.asst_waiting_list+g.asst_resource):
 
-            if g.debug_level >= 2:
-                print(f'Filling Triage Waiting list with {g.triage_waiting_list+g.triage_resource} patients')
-            
-            # prefill triage waiting list and resources using value from g class
-            for a in range(g.triage_waiting_list+g.triage_resource):
+            # Increment patient counter by 1
+            self.patient_counter += 1
+            #self.active_entities += 1
 
-                # Increment patient counter by 1
-                self.patient_counter += 1
-                #self.active_entities += 1
+            p = Patient(self.patient_counter)
 
-                p = Patient(self.patient_counter)
+            p.triage_wl_added = False
+            p.triage_already_seen = False
+            p.asst_wl_added = True
+            p.asst_already_seen = False
 
-                p.triage_wl_added = True
-                p.triage_already_seen = False
+            if p.asst_wl_added == True:
+                self.patient_source = 'Waiting List'
+            else:
+                self.patient_source = 'Referral Gen'
 
-                self.week_number = 0
+            p.asst_patient_source = self.patient_source
 
-                self.env.process(self.pathway_start_point(p, self.week_number))
+            if g.debug_level >= 1:
+                print(f'Week {self.week_number} Patient number {p.id} starting at {self.patient_source} created')
+
+            self.week_number = -1
+
+            self.env.process(self.pathway_start_point(p, self.week_number))
+    
+        if g.debug_level >= 2:
+            print(f'Filling Triage Waiting list with {g.triage_waiting_list+g.triage_resource} patients')
         
-        else: 
-            yield self.env.timeout(0)
-             
-        if g.prefill == True:
-                
-                if g.debug_level >= 2:
-                    print(f'Filling Assessment Waiting list with {g.asst_waiting_list+g.asst_resource} patients')
+        # prefill triage waiting list and resources using values from g class
+        for a in range(g.triage_waiting_list+g.triage_resource):
 
-                # prefill triage waiting list and resources using value from g class
-                for b in range(g.asst_waiting_list+g.asst_resource):
+            # Increment patient counter by 1
+            self.patient_counter += 1
+            #self.active_entities += 1
 
-                    # Increment patient counter by 1
-                    self.patient_counter += 1
-                    #self.active_entities += 1
+            p = Patient(self.patient_counter)
 
-                    p = Patient(self.patient_counter)
+            p.triage_wl_added = True
+            p.triage_already_seen = False
+            p.asst_wl_added = False
+            p.asst_already_seen = False
 
-                    p.asst_wl_added = True
-                    p.asst_already_seen = False
+            if p.triage_wl_added == True:
+                self.patient_source = 'Waiting List'
+            else:
+                self.patient_source = 'Referral Gen'
 
-                    self.week_number = 0
+            p.triage_patient_source = self.patient_source
 
-                    self.env.process(self.pathway_start_point(p, self.week_number))
-                
+            if g.debug_level >= 1:
+                    print(f'Week {self.week_number} Patient number {p.id} starting at {self.patient_source} created')
+            
+            self.week_number = -1
+
+            self.env.process(self.pathway_start_point(p, self.week_number))
+        # change to false then patients can start to flow as the full sim has started
+        g.prefill = False
+        # move on without waiting
         yield self.env.timeout(0)
-
-    # function to decide where patients start on the pathway
+    
+    # function to decide where patients start on the pathway depending on 
+    # whether they come from waiting lists or the referral generator
+    # this function is the merging point for both the prefill_waiting_lists and
+    # week_runner functions
     def pathway_start_point(self,patient,week_number):
         
         p = patient
 
         self.week_number = week_number
-       
-        if p.triage_already_seen == False:
+        ##### decide how the patient is entering the system #####
+        # if we are in the prefill stage do it this way
+        if g.prefill == True:
+            # patient coming from triage waiting list
+            if p.triage_already_seen == False and p.triage_wl_added == True:
 
-            yield self.env.process(self.triage_pathway(p,week_number))  
-
+                if g.debug_level >= 1:
+                            print(f'Week {self.week_number} Patient number {p.id} coming from {p.patient_source} starting at Triage created')
+                yield self.env.process(self.triage_pathway(p,week_number))  
+            # otherwise start them at assessment as alreay triaged
+            else:
+                if g.debug_level >= 1:
+                            print(f'Week {self.week_number} Patient number {p.id} coming from {p.patient_source} starting at Asst created')
+                yield self.env.process(self.asst_pathway(p,week_number))  
+        # otherwise start the patient right at the beginning of the pathway
         else:
-
-            yield self.env.process(self.asst_pathway(p,week_number))  
+            if g.debug_level >= 1:
+                        print(f'Week {self.week_number} Patient number {p.id} coming from {p.patient_source} starting at Referral created')
+            yield self.env.process(self.referral_pathway(p,week_number))  
 
     # generator function that represents the referral part of the pathway
     def referral_pathway(self, patient, week_number):
 
         p = patient
+
+        if g.debug_level >= 1:
+                        print(f'Week {week_number} Patient number {p.id} starting at Referral created')
 
         self.week_number = week_number
 
@@ -541,6 +590,9 @@ class Model:
 
             self.results_df.at[p.id, 'Referral Rejected'] = 1
 
+            if g.debug_level >= 1:
+                        print(f'Week {week_number} Patient number {p.id} REJECTED at Referral')
+
             
             self.reject_triage = g.triage_rejection_rate
             self.reject_pack = g.pack_rejection_rate
@@ -556,9 +608,14 @@ class Model:
 
             self.results_df.at[p.id, 'Week Number'] = self.week_number
 
+            if g.debug_level >= 1:
+                        print(f'Week {week_number} Patient number {p.id} ACCEPTED at Referral')
+
             ##### Now do the Triage #####
             # start up the triage patient pathway generator
-            self.env.process(self.pack_pathway(p))
+            if g.debug_level >= 1:
+                        print(f'Week {week_number} Patient number {p.id} sent for Triage')
+            self.env.process(self.triage_pathway(p))
 
     def triage_pathway(self, patient):
 
@@ -573,7 +630,7 @@ class Model:
             self.patient_source = 'Referral Gen'
 
         if g.debug_level >= 2:
-            print(f'Patient {p.id} added in week {p.week_added} from {self.patient_source}, current triage wl:{g.number_on_triage_wl}')
+            print(f'Patient {p.id} added in week {p.week_added} from {p.patient_source}, current triage wl:{g.number_on_triage_wl}')
 
         ##### Now do the Triage #####
 
@@ -586,12 +643,15 @@ class Model:
         # Request a Triage resource from the container
         with self.triage_res.get(1) as triage_req:
             yield triage_req
+
+            if g.debug_level >= 1:
+                        print(f'Week {self.week_number} Patient number {p.id} being put through Triage')
             
             # as each patient reaches this stage take them off Triage wl
             g.number_on_triage_wl -= 1
 
             if g.debug_level >= 2:
-                print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) put through triage')
+                print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) put through Triage')
 
             end_q_triage = self.env.now
             # pick a random time from 1-4 for how long it took to Triage
@@ -626,6 +686,9 @@ class Model:
                 
                 self.results_df.at[p.id, 'Triage Time Reject'] = \
                     self.random_normal(g.triage_discharge_time,g.std_dev)
+                
+                if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) REJECTED at Triage')
 
                 #reject all the other parts of the pathway if triage rejected
                 # SR Comment - see above ref setting of these patient attributes
@@ -638,6 +701,9 @@ class Model:
             else:
                 # record that the Triage was accepted
                 self.results_df.at[p.id, 'Triage Rejected'] = 0
+
+                if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) ACCEPTED at Triage')
 
                 yield self.env.timeout(sampled_triage_time)
 
@@ -662,6 +728,9 @@ class Model:
             self.results_df.at[p.id, 'Pack Rejected'] = 1
             self.results_df.at[p.id, 'Time Pack Reject'] = self.random_normal(\
                                                 g.pack_reject_time,g.std_dev)
+            
+            if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) REJECTED at Pack')
             #reject all the other parts of the pathway if pack rejected
             self.reject_obs = g.obs_rejection_rate
             self.reject_mdt = g.mdt_rejection_rate
@@ -676,6 +745,9 @@ class Model:
                                                     self.sampled_pack_time
             # Mark that the pack was returned on time
             self.results_df.at[p.id, 'Pack Rejected'] = 0
+
+            if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) ACCEPTED at Pack')
 
             ##### Now do the Observations #####
             # start up the mdt patient pathway generator
@@ -700,6 +772,9 @@ class Model:
                                                         self.sampled_obs_time
             self.results_df.at[p.id, 'Time Obs Reject'] = self.random_normal(\
                                                     g.obs_reject_time,g.std_dev)
+            
+            if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) REJECTED at Obs')
 
             #reject all the other parts of the pathway if obs rejected
             self.reject_mdt = g.mdt_rejection_rate
@@ -715,6 +790,9 @@ class Model:
 
             # Mark that the pack was returned on time
             self.results_df.at[p.id, 'Obs Rejected'] = 0
+
+            if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) ACCEPTED at Obs')
             #print(f'Patient {p} obs completed')
 
             ##### Now do the MDT #####
@@ -732,6 +810,9 @@ class Model:
         # add referral to MDT waiting list as has passed obs
         g.number_on_mdt_wl += 1
 
+        if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) waiting for MDT')
+
         # Record where they patient is on the MDT WL
         self.results_df.at[p.id, "MDT WL Posn"] = \
                                             g.number_on_mdt_wl
@@ -742,6 +823,9 @@ class Model:
             #print(f'Resource in use: {mdt_req}')
             # take patient off the MDT waiting list once MDT has taken place
             g.number_on_mdt_wl -= 1
+
+            if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) put through MDT')
 
             if g.debug_level >= 2:
                 print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) put through mdt')
@@ -765,6 +849,10 @@ class Model:
                 self.results_df.at[p.id, 'MDT Rejected'] = 1
 
                 self.results_df.at[p.id, 'MDT Time Reject'] = self.random_normal(g.mdt_reject_time,g.std_dev)
+
+                if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) REJECTED at MDT')
+
                 #reject all the other parts of the pathway if mdt rejected
                 self.reject_asst = g.asst_rejection_rate
 
@@ -772,6 +860,8 @@ class Model:
                 yield self.env.timeout(sampled_mdt_time)
             else:
                 self.results_df.at[p.id, 'MDT Rejected'] = 0
+                if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) ACCEPTED at MDT')
                 # release the MDT resource
                 yield self.env.timeout(sampled_mdt_time)
 
@@ -793,6 +883,9 @@ class Model:
         # add referral to asst waiting list as has passed mdt
         g.number_on_asst_wl += 1
 
+        if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) waiting for Asst')
+
         # Record where they patient is on the MDT WL
         self.results_df.at[p.id, "Asst WL Posn"] = \
                                                     g.number_on_asst_wl
@@ -803,6 +896,9 @@ class Model:
             #print(f'Resource in use: {asst_req}')
             # take patient off the Asst waiting list once Asst starts
             g.number_on_asst_wl -= 1
+
+            if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added})put through Asst')
 
             if p.asst_wl_added == True:
                 self.patient_source = 'Waiting List'
@@ -841,12 +937,20 @@ class Model:
 
                 self.results_df.at[p.id, 'Asst Rejected'] = 1
                 self.results_df.at[p.id,'Diag Rejected Time'] = self.random_normal(g.diag_time_disch,g.std_dev)
+
+                if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) REJECTED at Asst')
+
                 # release the resource once the Assessment is completed
                 yield self.env.timeout(sampled_asst_time)
 
             else:
                 self.results_df.at[p.id, 'Asst Rejected'] = 0
                 self.results_df.at[p.id, 'Diag Accepted Time'] = self.random_normal(g.diag_time_accept,g.std_dev)
+
+                if g.debug_level >= 2:
+                    print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) ACCEPTED at Asst')
+
                 # release the resource once the Assessment is completed
                 yield self.env.timeout(sampled_asst_time)
 
