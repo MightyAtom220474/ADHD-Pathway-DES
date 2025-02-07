@@ -94,11 +94,11 @@ with st.sidebar:
         # MDT Inputs
         st.divider()
         st.markdown("#### Job Plans")
-        b6_prac_avail_input = st.number_input(label="Starting Number of B6 Practitioner WTE",min_value=0.5,max_value=20.0,value = g.number_staff_b6_prac)
+        b6_prac_avail_input = st.number_input(label="Starting Number of B6 Practitioner WTE",min_value=0.5,max_value=20.0, step=0.5,value = g.number_staff_b6_prac)
         b6_prac_hours_input = st.slider(label="Number of B6 Hours per WTE", min_value=0.0, max_value=25.0, value=g.hours_avail_b6_prac)
         b6_prac_add_input = st.number_input("Additional Number of B6 Practitioners WTE",
                         min_value=0.0, max_value=20.0, step=0.5, value=0.0)
-        b4_prac_avail_input = st.number_input(label="Starting Number of B4 Practitioner WTE",min_value=0.5,max_value=20.0,value = g.number_staff_b4_prac)
+        b4_prac_avail_input = st.number_input(label="Starting Number of B4 Practitioner WTE",min_value=0.5,max_value=20.0, step=0.5,value = g.number_staff_b4_prac)
         b4_prac_hours_input = st.slider(label="Number of B4 Hours per WTE", min_value=0.0, max_value=25.0, value=g.hours_avail_b4_prac)
         b4_prac_add_input = st.number_input("Additional Number of B4 Practitioners WTE",
                         min_value=0.0, max_value=20.0, step=0.5, value=0.0)
