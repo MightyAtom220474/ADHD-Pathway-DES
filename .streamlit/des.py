@@ -46,7 +46,6 @@ with st.sidebar:
                         min_value=0.0, max_value=20.0, step=0.25, value=7.0)
         triage_wl_input = st.number_input("Current Triage Waiting List", min_value=0, max_value=2500, step=1, value=0)
         triage_target_input = st.slider("Number of Weeks to Triage", 1, 10, 4)
-        triage_resource_input =  st.slider("Number of Triage Slots per WTE", 0, 25, 8)
         triage_clin_time_input =  st.slider("Avg Clinical Time per Triage (mins)", 20, 60, 48)
         triage_admin_time_input =  st.slider("Avg Admin Time per Triage (mins)", 20, 60, 48)
 
@@ -84,7 +83,6 @@ with st.sidebar:
         asst_rejection_input = st.number_input("Referral Rejection Rate (%)",
                         min_value=0.0, max_value=20.0, step=0.25, value=3.0)
         asst_target_input = st.slider("Number of Weeks to Assess", 0, 5, 4)
-        asst_resource_input =  st.slider("Number of Assessment Slots per WTE", 0, 25, 3)
         asst_wl_input = st.number_input("Current Assessment Waiting List", min_value=0, max_value=2500, step=1, value=0)
         asst_clin_time_input =  st.slider("Avg Clinical Time per Asst (mins)", 60, 120, 90)
         asst_admin_time_input =  st.slider("Avg Admin Time per Asst (mins)", 60, 120, 90)
@@ -98,6 +96,8 @@ with st.sidebar:
         b6_prac_hours_input = st.slider(label="Number of B6 Hours per WTE", min_value=0.0, max_value=25.0, value=g.hours_avail_b6_prac)
         b6_prac_add_input = st.number_input("Additional Number of B6 Practitioners WTE",
                         min_value=0.0, max_value=20.0, step=0.5, value=0.0)
+        asst_resource_input =  st.slider("Number of Assessment Slots per B6", 0, 25, 3)
+        triage_resource_input =  st.slider("Number of Triage Slots per B6 WTE", 0, 25, 8)
         b4_prac_avail_input = st.number_input(label="Starting Number of B4 Practitioner WTE",min_value=0.5,max_value=20.0, step=0.5,value = g.number_staff_b4_prac)
         b4_prac_hours_input = st.slider(label="Number of B4 Hours per WTE", min_value=0.0, max_value=25.0, value=g.hours_avail_b4_prac)
         b4_prac_add_input = st.number_input("Additional Number of B4 Practitioners WTE",
