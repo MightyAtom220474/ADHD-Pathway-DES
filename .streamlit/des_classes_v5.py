@@ -654,11 +654,8 @@ class Model:
 
             self.results_df.at[p.id, 'Week Number'] = self.week_number
 
-            # add them to the triage waiting list here as came from Referral Gen not Triage WL
-            g.number_on_triage_wl += 1
-
             if g.debug_level >= 1:
-                        print(f'Week {week_number} Patient number {p.id} ACCEPTED at Referral')
+                print(f'Week {week_number} Patient number {p.id} ACCEPTED at Referral')
 
             if g.debug_level >= 1:
                 print(f'Patient {p.id} added in week {p.week_added} from {p.patient_source}, current triage wl:{g.number_on_triage_wl}')    
