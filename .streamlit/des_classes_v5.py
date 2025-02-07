@@ -272,7 +272,10 @@ class Model:
         
         if g.triage_waiting_list+g.asst_waiting_list > 0: 
         
+            # run prefilling of waiting lists first
             yield self.env.process(self.prefill_waiting_lists())
+            # now run the week runner
+            yield self.env.process(self.week_runner(g.sim_duration))
 
         # otherwise go straight to the week_runner to run the normal week_runner process
         else:
