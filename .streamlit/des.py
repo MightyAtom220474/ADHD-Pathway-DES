@@ -109,7 +109,7 @@ with st.sidebar:
     
         st.divider()
         st.markdown("#### Simulation Parameters")
-        sim_duration_input =  st.slider("Simulation Duration (weeks)", 1, 520, 52)
+        sim_duration_input =  st.slider("Simulation Duration (weeks)", min_value=26, max_value=520, value=52, step=26)
         st.write(f"The service is running for {sim_duration_input} weeks")
         number_of_runs_input = st.slider("Number of Simulation Runs", 1, 20, 10)
 

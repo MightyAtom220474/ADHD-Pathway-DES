@@ -29,7 +29,7 @@ class g:
 
     # Triage
     target_triage_wait = 4 # triage within 4 weeks
-    triage_waiting_list = 1000 # current number of patients on waiting list
+    triage_waiting_list = 0 # current number of patients on waiting list
     triage_rejection_rate = 0.05 # % rejected at triage, assume 5%
     triage_clin_time = 60 # number of mins for clinician to do triage
     triage_admin_time = 15 # number of mins of admin to do triage
@@ -62,7 +62,7 @@ class g:
     asst_clin_time = 90 # number of mins for clinician to do asst
     asst_admin_time = 90 # number of mins of admin following asst
     asst_rejection_rate = 0.01 # % found not to have ADHD, assume 1%
-    asst_waiting_list = 1000 # current number of patients on waiting list
+    asst_waiting_list = 0 # current number of patients on waiting list
 
     # Diagnosis
     diag_time_disch = 90 # time taken after asst if discharged
@@ -269,15 +269,14 @@ class Model:
         
         # if the waiting lists need to be added run this first
         # wait until prefill has completed before setting the simulation running
-        #if g.active_patients < g.triage_waiting_list+g.asst_waiting_list:
+        
+        if g.triage_waiting_list+g.asst_waiting_list > 0: 
+        
+            yield self.env.process(self.prefill_waiting_lists())
 
-        yield self.env.process(self.prefill_waiting_lists())
-
-        # otherwise go straight to the week_runner to run the normal process
-        #else:
-            
-            # set the week runner process running    
-        yield self.env.process(self.week_runner(g.sim_duration))
+        # otherwise go straight to the week_runner to run the normal week_runner process
+        else:
+            yield self.env.process(self.week_runner(g.sim_duration))
 
     def week_runner(self,number_of_weeks):
 
@@ -1134,10 +1133,10 @@ class Trial:
         # Once the trial (i.e. all runs) has completed, print the final results
         return self.df_trial_results, pd.concat(self.weekly_wl_dfs)
     
-# my_trial = Trial()
-# pd.set_option('display.max_rows', 1000)
-# # Call the run_trial method of our Trial class object
+my_trial = Trial()
+pd.set_option('display.max_rows', 1000)
+# Call the run_trial method of our Trial class object
 
-# df_trial_results, df_weekly_stats = my_trial.run_trial()
+df_trial_results, df_weekly_stats = my_trial.run_trial()
 
-# df_trial_results, df_weekly_stats
+df_trial_results, df_weekly_stats
