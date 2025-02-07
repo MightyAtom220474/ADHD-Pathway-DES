@@ -451,7 +451,7 @@ if button_run_pressed:
                                 #line_dash="Run",
                                 y="value",
                                 labels={
-                                        "value": "Waiters",
+                                        "value": "Rejections",
                                         #"sepal_width": "Sepal Width (cm)",
                                         #"species": "Species of Iris"
                                         },
