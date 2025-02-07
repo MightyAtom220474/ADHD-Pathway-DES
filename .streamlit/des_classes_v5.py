@@ -345,10 +345,9 @@ class Model:
                 print(f'Starting up the referral generator')
             # Start up the referral generator function
             self.env.process(self.generator_patient_referrals())
-
             self.referral_tot_screen = self.results_df['Referral Time Screen'
                                                                         ].sum()
-            self.max_triage_wl = self.results_df["Triage WL Posn"].max()
+            self.max_triage_wl = g.number_on_triage_wl # self.results_df["Triage WL Posn"].max()
             self.triage_rej = self.results_df["Triage Rejected"].sum()
             self.triage_avg_wait = self.results_df["Q Time Triage"].mean()
             self.triage_tot_clin = self.results_df['Triage Mins Clin'].sum()
@@ -362,11 +361,11 @@ class Model:
             self.obs_tot_rej = self.results_df["Time Obs Reject"].sum()
             self.mdt_tot_prep = self.results_df["Time Prep MDT"].sum()
             self.mdt_tot_meet = self.results_df["Time Meet MDT"].sum()
-            self.max_mdt_wl = self.results_df["MDT WL Posn"].max()
+            self.max_mdt_wl = g.number_on_mdt_wl # self.results_df["MDT WL Posn"].max()
             self.mdt_tot_rej = self.results_df["MDT Time Reject"].sum()
             self.mdt_rej = self.results_df["MDT Rejected"].sum()
             self.mdt_avg_wait = self.results_df["Q Time MDT"].mean()
-            self.max_asst_wl = self.results_df["Asst WL Posn"].max()
+            self.max_asst_wl = g.number_on_asst_wl # self.results_df["Asst WL Posn"].max()
             self.asst_rej = self.results_df["Asst Rejected"].sum()
             self.asst_avg_wait = self.results_df["Q Time Asst"].mean()
             self.asst_tot_clin = self.results_df['Asst Mins Clin'].sum()
@@ -460,19 +459,19 @@ class Model:
         # need to look at reproducibility
         # https://hsma-programme.github.io/hsma6_des_book/reproducibility.html#sec-robust
         
-        sampled_referrals_poisson = np.random.poisson(
+        self.sampled_referrals_poisson = np.random.poisson(
                             lam=g.mean_referrals_pw,
                             size=g.sim_duration*10
                             )
         # pick a value at random from the Poisson distribution
-        sampled_referrals = \
-                        int(random.choice(sampled_referrals_poisson))
+        self.sampled_referrals = \
+                        int(random.choice(self.sampled_referrals_poisson))
         
         # # increment week number by 1
         # self.week_number += 1
 
         if g.debug_level >= 1:
-            print(f'Week {self.week_number}: {sampled_referrals} referrals generated')
+            print(f'Week {self.week_number}: {self.sampled_referrals} referrals generated')
             print('')
             print(f'Still remaining on triage WL from last week: {g.number_on_triage_wl}')
 
@@ -485,7 +484,7 @@ class Model:
 
         self.referral_counter = 0
 
-        while self.referral_counter <= sampled_referrals:
+        while self.referral_counter <= self.sampled_referrals:
 
             # increment the referral counter by 1
             self.referral_counter += 1
@@ -692,6 +691,13 @@ class Model:
         p.week_added = self.week_number
 
         self.week_number = week_number
+
+        # if the patient comes from the referral generator and them to the WL here
+        if p.patient_source == 'Referral Gen':
+            g.number_on_triage_wl += 1
+
+        if g.debug_level >= 1:
+            print(f'Week {self.env.now}: Patient number {p.id} added to Triage WL from {p.patient_source}')
 
         # decide whether the triage was rejected
         self.reject_triage = random.uniform(0,1)
@@ -943,16 +949,20 @@ class Model:
         while g.active_patients <= g.triage_waiting_list+g.asst_waiting_list:
 
             pass
-        
-            # if g.debug_level >= 1:
-            #     print(f'Week {self.env.now}: Patient number {patient.id} (added week {patient.week_added}) {g.number_on_asst_wl} on WL for Asst')
-        
+                           
         # decide whether the assessment was rejected
         self.reject_asst = random.uniform(0,1)
 
         p = patient
 
         self.week_number = week_number
+
+        # if the patient comes from the referral generator or Triage WL add them to the asst WL here
+        if p.patient_source == 'Referral Gen' or p.patient_source == 'Triage WL':
+            g.number_on_asst_wl += 1
+
+        if g.debug_level >= 1:
+                    print(f'Week {self.env.now}: Patient number {p.id} added to Asst WL from {p.patient_source}, current Asst WL:{g.number_on_asst_wl}')
 
         p.week_added = self.week_number
 
@@ -962,7 +972,7 @@ class Model:
         if g.debug_level >= 1:
                     print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added}) waiting for Asst')
 
-        # Record where they patient is on the MDT WL
+        # Record where they patient is on the Asst WL
         self.results_df.at[p.id, "Asst WL Posn"] = \
                                                     g.number_on_asst_wl
         # Wait until an Assessment resource becomes available
@@ -980,7 +990,7 @@ class Model:
 
             if g.debug_level >= 1:
                 print(f'Week {self.env.now}: Patient number {p.id} (added week {p.week_added})put through Asst')
-                print(f'Patient {p.id} added in week {p.week_added} from {p.patient_source}, current Asst WL:{g.number_on_asst_wl}')
+                print(f'Patient {p.id} added in week {p.week_added} from {p.patient_source}, Asst WL now:{g.number_on_asst_wl}')
 
             end_q_asst = self.env.now
 
@@ -1044,10 +1054,12 @@ class Model:
         self.max_mdt_wl = g.number_on_mdt_wl #self.results_df["MDT WL Posn"].max()
         self.mean_q_time_asst = self.results_df["Q Time Asst"].mean()
         self.max_asst_wl = g.number_on_asst_wl#self.results_df["Asst WL Posn"].max()
-        # reset waiting lists ready for next run
+        
+        # reset waiting lists and other counters ready for next run
         g.number_on_triage_wl = 0
         g.number_on_mdt_wl = 0
         g.number_on_asst_wl = 0
+        g.active_patients = 0
 
     # The run method starts up the DES entity generators, runs the simulation,
     # and in turns calls anything we need to generate results for the run
@@ -1122,10 +1134,10 @@ class Trial:
         # Once the trial (i.e. all runs) has completed, print the final results
         return self.df_trial_results, pd.concat(self.weekly_wl_dfs)
     
-my_trial = Trial()
-pd.set_option('display.max_rows', 1000)
-# Call the run_trial method of our Trial class object
+# my_trial = Trial()
+# pd.set_option('display.max_rows', 1000)
+# # Call the run_trial method of our Trial class object
 
-df_trial_results, df_weekly_stats = my_trial.run_trial()
+# df_trial_results, df_weekly_stats = my_trial.run_trial()
 
-df_trial_results, df_weekly_stats
+# df_trial_results, df_weekly_stats
