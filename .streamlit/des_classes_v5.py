@@ -29,6 +29,7 @@ class g:
 
     # Triage
     target_triage_wait = 4 # triage within 4 weeks
+    triage_average_wait = 4 # current avg wait for triage for patients on the waiting list
     triage_waiting_list = 0 # current number of patients on waiting list
     triage_rejection_rate = 0.05 # % rejected at triage, assume 5%
     triage_clin_time = 60 # number of mins for clinician to do triage
@@ -58,6 +59,7 @@ class g:
 
     # Assessment
     target_asst_wait = 4 # assess within 4 weeks
+    asst_average_wait = 52 # current avg wait for triage for patients on the waiting list
     asst_resource = 62 # number of assessment slots p/w @ 60 mins
     asst_clin_time = 90 # number of mins for clinician to do asst
     asst_admin_time = 90 # number of mins of admin following asst
@@ -730,8 +732,11 @@ class Model:
             # pick a random time from 1-4 for how long it took to Triage
             sampled_triage_time = round(random.uniform(0, 4), 1)
 
-            # Calculate how long it took the patient to be Triaged
-            self.q_time_triage = end_q_triage - start_q_triage
+            # Calculate how long the patient waited to be Triaged
+            if g.prefill == True:
+                self.q_time_triage = (end_q_triage - start_q_triage) + g.triage_average_wait
+            else:
+                self.q_time_triage = end_q_triage - start_q_triage 
 
             # Record how long the patient waited to be Triaged
             self.results_df.at[p.id, 'Q Time Triage'] = \
@@ -996,8 +1001,11 @@ class Model:
             # pick a random time from 1-4 for how long it took to Assess
             self.sampled_asst_time = round(random.uniform(0,4),1)
 
-            # Calculate how long it took the patient to be Assessed
-            self.q_time_asst = end_q_asst - start_q_asst
+            # Calculate how long the patient waited to be Assessed
+            if g.prefill == True:
+                self.q_time_triage = (end_q_asst - start_q_asst) + g.triage_average_wait
+            else:
+                self.q_time_triage = end_q_asst - start_q_asst 
 
             # Record how long the patient waited to be Assessed
             self.results_df.at[p.id, 'Q Time Asst'] = \

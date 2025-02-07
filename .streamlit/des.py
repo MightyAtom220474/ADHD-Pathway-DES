@@ -45,6 +45,10 @@ with st.sidebar:
         triage_rejection_input = st.number_input("Triage Rejection Rate (%)",
                         min_value=0.0, max_value=20.0, step=0.25, value=7.0)
         triage_wl_input = st.number_input("Current Triage Waiting List", min_value=0, max_value=2500, step=1, value=0)
+        if triage_wl_input > 0:
+            triage_wait_input = st.number_input("Current Average Triage Waiting Time (weeks)", min_value=0, max_value=52, step=1, value=0)
+        else:
+            triage_wait_input = 0
         triage_target_input = st.slider("Number of Weeks to Triage", 1, 10, 4)
         triage_clin_time_input =  st.slider("Avg Clinical Time per Triage (mins)", 20, 60, 48)
         triage_admin_time_input =  st.slider("Avg Admin Time per Triage (mins)", 20, 60, 48)
@@ -84,6 +88,10 @@ with st.sidebar:
                         min_value=0.0, max_value=20.0, step=0.25, value=3.0)
         asst_target_input = st.slider("Number of Weeks to Assess", 0, 5, 4)
         asst_wl_input = st.number_input("Current Assessment Waiting List", min_value=0, max_value=2500, step=1, value=0)
+        if asst_wl_input > 0:
+            asst_wait_input = st.number_input("Current Average Assessment Waiting Time (weeks)", min_value=0, max_value=156, step=1, value=0)
+        else:
+            asst_wait_input = 0
         asst_clin_time_input =  st.slider("Avg Clinical Time per Asst (mins)", 60, 120, 90)
         asst_admin_time_input =  st.slider("Avg Admin Time per Asst (mins)", 60, 120, 90)
 
@@ -119,6 +127,7 @@ g.referral_rejection_rate = referral_reject_input/100
 g.triage_rejection_rate = triage_rejection_input/100
 g.target_triage_wait = triage_target_input
 g.triage_waiting_list = triage_wl_input
+g.triage_average_wait = triage_wait_input
 g.triage_resource = int(triage_resource_input * (b6_prac_avail_input+b6_prac_add_input))
 g.triage_time_clin = triage_clin_time_input
 g.triage_time_admin = triage_admin_time_input
@@ -134,6 +143,7 @@ g.staff_weeks_lost = weeks_lost_input
 g.asst_rejection_rate = asst_rejection_input/100
 g.target_asst_wait = asst_target_input
 g.asst_waiting_list = asst_wl_input
+g.asst_average_wait = asst_wait_input
 g.asst_resource = int(asst_resource_input * (b6_prac_avail_input+b6_prac_add_input))
 g.asst_time_clin = asst_clin_time_input
 g.asst_time_admin = asst_admin_time_input
