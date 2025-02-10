@@ -1003,9 +1003,9 @@ class Model:
 
             # Calculate how long the patient waited to be Assessed
             if g.prefill == True:
-                self.q_time_triage = (end_q_asst - start_q_asst) + g.triage_average_wait
+                self.q_time_asst = (end_q_asst - start_q_asst) + g.triage_average_wait
             else:
-                self.q_time_triage = end_q_asst - start_q_asst 
+                self.q_time_asst = end_q_asst - start_q_asst 
 
             # Record how long the patient waited to be Assessed
             self.results_df.at[p.id, 'Q Time Asst'] = \
