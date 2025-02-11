@@ -7,8 +7,6 @@ import pandas as pd
 # Assumptions - CYP stay on caseload until they are 18
 # only accepted referralS flow through the pathway
 # Same clinician will take CYP through each of the steps
-# Overall caseload = clinician_caseload * number_adhd_clinicians
-# repeat titration taken out due to complexities of modelling for this
 # assume all patients get a triage and it doesn't stop patients flowing through
 # the rest of the pathway
 # assessment doesn't start until there is space on a clinicians caseload
@@ -1141,10 +1139,10 @@ class Trial:
         # Once the trial (i.e. all runs) has completed, print the final results
         return self.df_trial_results, pd.concat(self.weekly_wl_dfs)
     
-# my_trial = Trial()
-# pd.set_option('display.max_rows', 1000)
-# # Call the run_trial method of our Trial class object
+my_trial = Trial()
+pd.set_option('display.max_rows', 1000)
+# Call the run_trial method of our Trial class object
 
-# df_trial_results, df_weekly_stats = my_trial.run_trial()
+df_trial_results, df_weekly_stats = my_trial.run_trial()
 
-# df_trial_results, df_weekly_stats
+df_trial_results, df_weekly_stats
