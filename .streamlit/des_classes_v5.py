@@ -18,7 +18,7 @@ import pandas as pd
 # inside.
 class g:
 
-    debug_level = 2
+    debug_level = 0
 
     # Referrals
     mean_referrals_pw = 60
