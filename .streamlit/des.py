@@ -86,7 +86,7 @@ with st.sidebar:
         st.markdown("#### Assessment")
         asst_rejection_input = st.number_input("Referral Rejection Rate (%)",
                         min_value=0.0, max_value=20.0, step=0.25, value=3.0)
-        asst_target_input = st.slider("Number of Weeks to Assess", 0, 5, 4)
+        asst_target_input = st.slider("Number of Weeks to Assess", 0, 52, 4)
         asst_wl_input = st.number_input("Current Assessment Waiting List", min_value=0, max_value=2500, step=1, value=0)
         if asst_wl_input > 0:
             asst_wait_input = st.number_input("Current Average Assessment Waiting Time (weeks)", min_value=0, max_value=156, step=1, value=0)
